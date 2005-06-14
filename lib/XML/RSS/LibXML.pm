@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 2 2005-06-14 02:52:09Z daisuke $
+# $Id: LibXML.pm 3 2005-06-14 04:52:03Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -202,7 +202,7 @@ XML::RSS::LibXML - XML::RSS with XML::LibXML (parse-only)
 
   use XML::RSS::LibXML;
   my $rss = XML::RSS::LibXML->new;
-  $rss->parse_file($file);
+  $rss->parsefile($file);
 
   print "channel: $rss->{channel}->{title}\n";
   foreach my $item (@{ $rss->{items} }) {
@@ -235,7 +235,7 @@ Creates a new instance of XML::RSS::LibXML
 
 Parse a string containing RSS.
 
-=head2 parsestring($filename)
+=head2 parse_file($filename)
 
 Parse an RSS file specified by $filename
 
