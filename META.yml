@@ -1,10 +1,7 @@
 ---
 name: XML-RSS-LibXML
 version: 0.01
-author:
-  - |-
-    Copyright 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>. All rights reserved.
-    Development funded by Brazil, Ltd. E<lt>http://b.razil.jpE<gt>
+author: ~
 abstract: XML::RSS with XML::LibXML (parse-only)
 license: perl
 requires:

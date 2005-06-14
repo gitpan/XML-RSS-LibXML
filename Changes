@@ -3,6 +3,16 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.01 - 14 June 2005
+  - Seems like some people just think about the same thing. Tatsuhiko
+    Miyagawa caught me doing some of the same thing he was doing in an
+    unrelease module, so merged some features from his :)
+  - Added add_module() (Tatsuhiko Miyagawa)
+  - Added as_string() (Tatsuhiko Miyagawa)
+  - Added add_parse_context().
+  - Added fields to be parsed by default.
+  - Changed internal representation a bit.
+
 0.01_02 - 14 June 2005
   - Doc screw up
 
