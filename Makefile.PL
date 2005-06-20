@@ -3,7 +3,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile
 (
           'DISTNAME' => 'XML-RSS-LibXML',
-          'VERSION_FROM' => 'lib/XMl/RSS/LibXML.pm',
+          'VERSION_FROM' => 'lib/XML/RSS/LibXML.pm',
           'PREREQ_PM' => {
                            'Test::More' => '0',
                            'XML::LibXML' => '0',

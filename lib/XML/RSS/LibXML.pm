@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 4 2005-06-14 07:13:20Z daisuke $
+# $Id: LibXML.pm 9 2005-06-20 12:10:24Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -17,35 +17,13 @@ my %namespaces = (
     content => "http://purl.org/rss/1.0/modules/content/",
     cc      => "http://web.resource.org/cc/",
     taxo    => "http://purl.org/rss/1.0/modules/taxonomy/",
+    rss20   => "http://backend.userland.com/rss2", # really a dummy
     rss10   => "http://purl.org/rss/1.0/",
     rss09   => "http://my.netscape.com/rdf/simple/0.9/",
 );
 
-my %ParseContext = (
-    channel => {
-        link        => [ qw(link @rdf:about) ],
-        creator     => [ qw(dc:creator) ],
-        contributor => [ qw(dc:contributor) ],
-        coverage    => [ qw(dc:coverage) ],
-        title       => [ qw(title dc:title) ],
-        language    => [ qw(language) ],
-        copyright   => [ qw(dc:rights copyright) ],
-        generator   => [ qw(admin:generatorAgent generator) ],
-        identifier  => [ qw(dc:identifier) ],
-    },
-    item => {
-        # run this only on <item> elements
-        description => [ qw(description) ],
-        content     => [ qw(content:encoded description) ],
-        link        => [ qw(link) ],
-        title       => [ qw(title dc:title) ],
-        issued      => [ qw(dcterms:issued dc:date pubDate) ],
-        modified    => [ qw(dcterms:modified dc:date pubDate) ],
-        creator     => [ qw(dc:creator author) ]
-    }
-);
-
 my %VersionPrefix = (
+    '2.0' => 'rss20',
     '1.0' => 'rss10',
     '0.9' => 'rss09',
 );
@@ -62,7 +40,7 @@ sub new
     my $self = bless {
         _parser => $p,
         _context => $c,
-        _pctxt   => { channel => {}, item => {} },
+        _namespaces => {}
     }, $class;
 
     $self->_init();
@@ -77,15 +55,6 @@ sub _init
     while (my($prefix, $uri) = each %namespaces) {
         $self->add_module(prefix => $prefix, uri => $uri);
     }
-
-    # Register parse contexts.
-    while (my($context, $map) = each %ParseContext) {
-        while (my($field, $xpath_list) = each %$map) {
-            foreach my $xpath (@$xpath_list) {
-                $self->add_parse_context(context => $context, field => $field, xpath => $xpath);
-            }
-        }
-    }
 }
 
 sub add_module
@@ -93,22 +62,8 @@ sub add_module
     my $self = shift;
     my %args = @_;
     $self->{_context}->registerNs($args{prefix}, $args{uri});
+    $self->{_namespaces}->{$args{prefix}} = $args{uri};
 }
-
-sub add_parse_context
-{
-    my $self = shift;
-    my %args = @_;
-
-    my $context = lc($args{context});
-    my $field   = lc($args{field});
-    my $xpath   = $args{xpath};
-
-    my $pctxt = $self->{_pctxt};
-    $pctxt->{$context}->{$field} ||= [];
-    push @{$pctxt->{$context}->{$field}}, $xpath;
-}
-
 
 sub parse
 {
@@ -153,8 +108,9 @@ sub _parse_dom
 
 sub _xpath_context
 {
+    my $self = shift;
     my $xc  = XML::LibXML::XPathContext->new();
-    while (my($prefix, $namespace) = each %namespaces) {
+    while (my($prefix, $namespace) = each %{$self->{_namespaces}}) {
         $xc->registerNs($prefix, $namespace);
     }
     return $xc;
@@ -183,7 +139,7 @@ sub _guess_version
     return 'UNKNOWN';
 }
 
-sub _grab_value
+sub grab_data
 {
     my($self, $node, $xc, $candidates) = @_;
     return unless $candidates;
@@ -196,16 +152,23 @@ sub _grab_value
         } else {
             $xpath = $xp;
         }
-        my($v) = eval { $xc->findnodes($xpath, $node) };
-        return $v->textContent() if $v;
+        if (my($v) = eval { $xc->findnodes($xpath, $node) }) {
+            my %data;
+            if (my $prefix = $v->prefix) {
+                $data{prefix} = $prefix;
+                $data{name}   = $v->localname;
+            }
+            $data{data} = $v->textContent();
+            return \%data;
+        }
     }
     return;
 }
 
 my %ChannelRoot = (
-    '1.0'   => '/rdf:RDF/rss10:channel',
-    '0.9'   => '/rdf:RDF/rss09:channel',
-    'other' => '/rss/channel'
+    '1.0' => '/rdf:RDF/rss10:channel',
+    '0.9' => '/rdf:RDF/rss09:channel',
+    '2.0' => '/rss/channel'
 );
 sub _parse_channel
 {
@@ -213,29 +176,22 @@ sub _parse_channel
     my %args = @_;
 
     my $dom = $self->{_dom} or die "channel called before parse!";
-    my %channel;
     my $version = $self->{_internal}->{version};
+    my $xc = $self->_xpath_context;
     my $root_xpath = $ChannelRoot{$version} || $ChannelRoot{other};
-    my $xc = $self->_xpath_context();
-    my($channel) = $xc->findnodes($root_xpath, $dom);
 
-    my $value;
-
-    my $want = $self->{_pctxt}->{channel};
-    while (my($field, $xpath_list) = each %$want) {
-        if (defined($value = $self->_grab_value($channel, $xc, $xpath_list))) {
-            $channel{$field} = $value;
-        }
+    if( my ($channel) = $xc->findnodes($root_xpath, $dom)) {
+        return $self->_parse_children($channel);
     }
-
-    return \%channel;
+    return undef;
 }
 
 my %ItemRoot = (
     '1.0'   => '/rdf:RDF/rss10:item',
     '0.9'   => '/rdf:RDF/rss09:item',
-    'other' => '/rss/channel/item'
+    '2.0' => '/rss/channel/item'
 );
+
 sub _parse_items
 {
     my $self = shift;
@@ -244,25 +200,45 @@ sub _parse_items
 
     my @items;
     my $version = $self->{_internal}->{version};
-    my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
     my $xc = $self->_xpath_context;
-
-    my $want = $self->{_pctxt}->{item};
+    my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
+    # grab everything by namespace 
     foreach my $item ($xc->findnodes($root_xpath, $dom)) {
-        my %item;
-        my $value;
-
-        while (my($field, $xpath_list) = each %$want) {
-            if (defined($value = $self->_grab_value($item, $xc, $xpath_list))) {
-                $item{$field} = $value;
-            }
-        }
-        push @items, \%item;
+        push @items, $self->_parse_children($item);
     }
-
     return wantarray ? @items : \@items;
 }
 
+sub _parse_children
+{
+    my $self = shift;
+    my $node = shift;
+    my $version = $self->{_internal}->{version};
+    my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
+    my $xc = $self->_xpath_context;
+    my $vprefix = $VersionPrefix{$version};
+
+    my %item;
+    foreach my $prefix (keys %{$self->{_namespaces}}) {
+        next if $prefix =~ /^rss/ && $prefix ne $vprefix;
+        my %sub;
+        my $xpath = $prefix eq $vprefix ? 
+            "./*" : "./*[starts-with(name(), '$prefix:')]";
+        foreach my $node ($xc->findnodes($xpath, $node)) {
+            $sub{$node->localname} = $node->textContent();
+        }
+        if (keys %sub) {
+            if ($vprefix eq $prefix) {
+                while (my ($key, $value) = each %sub) {
+                    $item{$key} = $value;
+                }
+            } else {
+                $item{$prefix} = \%sub;
+            }
+        }
+    }
+    return \%item;
+}
 1;
 
 __END__
@@ -306,8 +282,7 @@ such that it adheres to the XML::RSS interface.
 
 XML::RSS::LibXML is B<NOT> 100% compatible with XML::RSS. 
 For example, XML::RSS::LibXML is not capable of outputting RSS in
-various formats, and namespaces aren't exactly supported the way they are
-in XML::RSS (patches welcome).
+various formats.
 
 Use this module when you have severe performance requirements in parsing
 RSS files.
@@ -332,7 +307,7 @@ Parse an RSS file specified by $filename
 
 Return the string representation of the parsed RSS.
 
-=head2 add_module(uri =E<lt> $uri, prefix =E<lt> $prefix)
+=head2 add_module(uri =E<gt> $uri, prefix =E<gt> $prefix)
 
 Adds a new module. You should do this before parsing the RSS.
 XML::RSS::LibXML understands a few modules by default:
@@ -346,33 +321,6 @@ XML::RSS::LibXML understands a few modules by default:
     taxo    => "http://purl.org/rss/1.0/modules/taxonomy/",
 
 So you do not need to add these explicitly.
-
-=head2 add_parse_context(context =E<lt> $context, field =E<lt> $field, xpath =E<lt> $xpath)
-
-Adds new parse contexts. XML::RSS::LibXML attempts to parse most of the
-oft-used fields from RSS feeds, but often there are times when you want
-finer grain of control.
-
-If, for example, you want to include a custom field in within the 
-E<lt>channelE<gt> element called C<foo>, you may add something like this:
-
-  $rss->add_parse_context(
-    context => 'channel',
-    field   => 'foo',
-    xpath   => 'foo', # XPath relative to the current context, which is
-                      # 'channel'
-  );
-  $rss->parsefile($file);
-
-Then after parsing, $rss will contain a structure like this:
-
-  $rss = {
-    channel => {
-      foo => $value_of_foo
-      # other fields
-    },
-    # other fields
-  };
 
 =head1 PERFORMANCE
 

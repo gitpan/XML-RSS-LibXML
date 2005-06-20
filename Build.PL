@@ -1,5 +1,5 @@
 #!perl
-# $Id: Build.PL 2 2005-06-14 02:52:09Z daisuke $
+# $Id: Build.PL 5 2005-06-20 05:25:21Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -9,7 +9,7 @@ use Module::Build;
 
 my $build = Module::Build->new(
     dist_name => 'XML-RSS-LibXML',
-    dist_version_from => 'lib/XMl/RSS/LibXML.pm',
+    dist_version_from => 'lib/XML/RSS/LibXML.pm',
     requires => {
         'XML::LibXML' => 0,
         'XML::LibXML::XPathContext' => 0

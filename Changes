@@ -3,6 +3,18 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.01_01 - 20 June 2005
+  - Typo in Build.PL/Makefile.PL (Tatsuhiko Miyagawa)
+
+  **** Backwards Incompatible Change ****
+  - Make namespace handling the same as XML::RSS - e.g.,
+    <content:encoded> is not parsed as $item->{content}->{encoded}.
+    (thanks to Tatsuhiko Miyagawa for suggestions)
+  - Remove add_parse_context(), as it is no longer necessary.
+  - Parsing is now done only on nodes that are immediately under
+    <channel> and <item>. This is not correct spec-wise, but it does the
+    job for most of the RSS out there.
+
 0.01 - 14 June 2005
   - Seems like some people just think about the same thing. Tatsuhiko
     Miyagawa caught me doing some of the same thing he was doing in an
