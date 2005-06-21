@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.04 - 21 June 2005
+  - No code change.
+  - Clarify compatibility issues.
+  - Fix typos
+
 0.03 - 21 June 2005
   - channel() fix by Naoya Ito (compatibility with XML::RSS)
 
@@ -16,7 +21,7 @@ Except where noted, all changes made by Daisuke Maki
 
   **** Backwards Incompatible Change ****
   - Make namespace handling the same as XML::RSS - e.g.,
-    <content:encoded> is not parsed as $item->{content}->{encoded}.
+    <content:encoded> is now parsed as $item->{content}->{encoded}.
     (thanks to Tatsuhiko Miyagawa for suggestions)
   - Remove add_parse_context(), as it is no longer necessary.
   - Parsing is now done only on nodes that are immediately under

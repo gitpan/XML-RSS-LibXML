@@ -1,11 +1,11 @@
-# $Id: LibXML.pm 12 2005-06-21 09:43:03Z daisuke $
+# $Id: LibXML.pm 13 2005-06-21 12:31:31Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 
@@ -278,12 +278,26 @@ So for a long time I had been using my own version of RSS parser to get the
 maximum speed and efficiency - this is the re-packaged version of that module,
 such that it adheres to the XML::RSS interface.
 
-XML::RSS::LibXML is B<NOT> 100% compatible with XML::RSS. 
-For example, XML::RSS::LibXML is not capable of outputting RSS in
-various formats.
-
 Use this module when you have severe performance requirements in parsing
 RSS files.
+
+=head1 COMPATIBILITY
+
+There seems to be a bit of confusion as to how compatible XML::RSS::LibXML 
+is with XML::RSS: XML::RSS::LibXML is B<NOT> 100% compatible with XML::RSS. 
+For example, XML::RSS::LibXML is not capable of outputting RSS in
+various formats. It also doesn't do complete parsing of the XML document
+because of the way we deal with XPath and libxml's DOM (see CAVEATS below)
+
+On top of that, I originally wrote XML::RSS::LibXML as sort of a fast 
+replacement for XML::RAI, which looked cool in terms of abstracting the 
+various modules.  And therefore versions prior to 0.02 worked more like 
+XML::RAI rather than XML::RSS. That was a mistake in hind sight, so it has
+been addressed.
+
+From now on XML::RSS::LibXML will try to match XML::RSS's functionality as
+much as possible in terms of parsing RSS feeds. Please send in patches and
+any tests that may be useful!
 
 =head1 PARSED FIELDS
 
@@ -297,7 +311,7 @@ Creates a new instance of XML::RSS::LibXML
 
 Parse a string containing RSS.
 
-=head2 parse_file($filename)
+=head2 parsefile($filename)
 
 Parse an RSS file specified by $filename
 
