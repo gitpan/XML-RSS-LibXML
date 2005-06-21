@@ -1,11 +1,11 @@
-# $Id: LibXML.pm 10 2005-06-21 02:54:46Z daisuke $
+# $Id: LibXML.pm 12 2005-06-21 09:43:03Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 
@@ -94,7 +94,13 @@ sub as_string
 }
 
 sub _elem { $_[0]->{$_[1]} }
-sub channel { shift->_elem('channel') }
+
+sub channel
+{
+    my $self = shift;
+    return $_[0] ? $self->_elem('channel')->{$_[0]} : $self->_elem('channel');
+}
+
 sub items   { shift->_elem('items')   }
 
 sub _parse_dom

@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.03 - 21 June 2005
+  - channel() fix by Naoya Ito (compatibility with XML::RSS)
+
 0.02 - 21 June 2005
   - Doc tweaks.
   - This be 0.02. Remember to read the backward incompatible changes

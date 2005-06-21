@@ -1,6 +1,6 @@
 ---
 name: XML-RSS-LibXML
-version: 0.02
+version: 0.03
 author: ~
 abstract: XML::RSS with XML::LibXML (parse-only)
 license: perl
@@ -12,5 +12,5 @@ build_requires:
 provides:
   XML::RSS::LibXML:
     file: lib/XML/RSS/LibXML.pm
-    version: 0.02
+    version: 0.03
 generated_by: Module::Build version 0.2611
