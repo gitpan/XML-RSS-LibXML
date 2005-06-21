@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.02 - 21 June 2005
+  - Doc tweaks.
+  - This be 0.02. Remember to read the backward incompatible changes
+    below.
+
 0.01_01 - 20 June 2005
   - Typo in Build.PL/Makefile.PL (Tatsuhiko Miyagawa)
 

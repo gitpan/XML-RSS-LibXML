@@ -1,11 +1,11 @@
-# $Id: LibXML.pm 9 2005-06-20 12:10:24Z daisuke $
+# $Id: LibXML.pm 10 2005-06-21 02:54:46Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 
@@ -261,14 +261,6 @@ XML::RSS::LibXML - XML::RSS with XML::LibXML (parse-only)
   # Add custom modules
   $rss->add_module(uri => $uri, prefix => $prefix);
 
-  # Add custom parse contexts
-  $rss->add_parse_context(
-    context => $context, # 'channel', 'item'
-    field   => $field_name,
-    xpath   => $xpath
-  );
-  $rss->parse(...); # now parse with new context
-
 =head1 DESCRIPTION
 
 XML::RSS::LibXML uses XML::LibXML (libxml2) for parsing RSS instead of XML::RSS'
@@ -334,6 +326,10 @@ Here's a simple benchmark using benchmark.pl in this distribution:
 =head1 CAVEATS
 
 No support whatsover for writing RSS. No plans to support it either.
+
+Only first level data under E<lt>channelE<gt> and E<lt>itemE<gt> tags are
+examined. So if you have complex data, this module will not pick it up.
+For most of the cases, this will suffice, though.
 
 =head1 TODO
 
