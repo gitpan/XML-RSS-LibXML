@@ -53,7 +53,7 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0" encoding="UTF-8"?>
 </rdf:RDF>
 );
 
-plan tests => 10;
+plan tests => 14;
 
 use_ok("XML::RSS::LibXML");
 
@@ -81,6 +81,11 @@ cmp_ok($xml->{channel}->{'title'},
        RSS_CHANNEL_TITLE,
        "Feed title is ".RSS_CHANNEL_TITLE);
 
+cmp_ok($xml->channel->{'title'},
+       "eq",
+       RSS_CHANNEL_TITLE,
+       "Feed title is ".RSS_CHANNEL_TITLE);
+
 cmp_ok(ref($xml->{items}),
        "eq",
        "ARRAY",
@@ -103,6 +108,10 @@ foreach my $item (@{$xml->{items}}) {
 is $xml->{items}->[1]->{dc}->{date}, "2005-08-23T07:00+00:00";
 is $xml->{items}->[1]->{content}->{encoded}, 'TEST';
 is $xml->{items}->[1]->{example}->{foo}, "bar";
+
+is $xml->{items}->[1]->{'http://purl.org/dc/elements/1.1/'}->{date}, "2005-08-23T07:00+00:00";
+is $xml->{items}->[1]->{'http://purl.org/rss/1.0/modules/content/'}->{encoded}, 'TEST';
+is $xml->{items}->[1]->{'http://example.org/ns#'}->{foo}, "bar";
 
 ok($ok,"All items have title,link and description elements");
 

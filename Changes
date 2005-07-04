@@ -3,20 +3,24 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
-0.04 - 21 June 2005
+0.05 - 04 Jul 2005 ("I'm so dumb" Release)
+  - Make $item->{$namespace_uri}->{$tag} work. Patch by Naoya Ito.
+  - Add corresponding tests. Patch by Naoya Ito.
+
+0.04 - 21 Jun 2005
   - No code change.
   - Clarify compatibility issues.
   - Fix typos
 
-0.03 - 21 June 2005
+0.03 - 21 Jun 2005
   - channel() fix by Naoya Ito (compatibility with XML::RSS)
 
-0.02 - 21 June 2005
+0.02 - 21 Jun 2005
   - Doc tweaks.
   - This be 0.02. Remember to read the backward incompatible changes
     below.
 
-0.01_01 - 20 June 2005
+0.01_01 - 20 Jun 2005
   - Typo in Build.PL/Makefile.PL (Tatsuhiko Miyagawa)
 
   **** Backwards Incompatible Change ****
@@ -28,7 +32,7 @@ Except where noted, all changes made by Daisuke Maki
     <channel> and <item>. This is not correct spec-wise, but it does the
     job for most of the RSS out there.
 
-0.01 - 14 June 2005
+0.01 - 14 Jun 2005
   - Seems like some people just think about the same thing. Tatsuhiko
     Miyagawa caught me doing some of the same thing he was doing in an
     unrelease module, so merged some features from his :)

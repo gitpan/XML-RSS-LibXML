@@ -5,7 +5,7 @@
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 
@@ -240,6 +240,7 @@ sub _parse_children
                 }
             } else {
                 $item{$prefix} = \%sub;
+		$item{$self->{_namespaces}->{$prefix}} = \%sub;
             }
         }
     }
