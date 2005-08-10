@@ -1,13 +1,14 @@
-# $Id: LibXML.pm 13 2005-06-21 12:31:31Z daisuke $
+# $Id: LibXML.pm 14 2005-07-04 01:47:31Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
+use XML::RSS::LibXML::MagicElement;
 
 my %namespaces = (
     rdf     => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -228,10 +229,23 @@ sub _parse_children
     foreach my $prefix (keys %{$self->{_namespaces}}) {
         next if $prefix =~ /^rss/ && $prefix ne $vprefix;
         my %sub;
+
+        # this separates native rss elements with those elements that
+        # are explicitly tagged with a prefix.
         my $xpath = $prefix eq $vprefix ? 
             "./*" : "./*[starts-with(name(), '$prefix:')]";
+
+        # now, for each node that we can cover, go and parse
         foreach my $node ($xc->findnodes($xpath, $node)) {
-            $sub{$node->localname} = $node->textContent();
+            # argh. it has attributes. we do our little hack...
+            if ($node->hasAttributes) {
+                $sub{$node->localname} = XML::RSS::LibXML::MagicElement->new(
+                    content => $node->textContent(),
+                    attributes => [ $node->attributes ]
+                );
+            } else {
+                $sub{$node->localname} = $node->textContent();
+            }
         }
         if (keys %sub) {
             if ($vprefix eq $prefix) {

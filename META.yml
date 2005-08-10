@@ -1,6 +1,6 @@
---- #YAML:1.0
+---
 name: XML-RSS-LibXML
-version: 0.05
+version: 0.06
 author: ~
 abstract: XML::RSS with XML::LibXML (parse-only)
 license: perl
@@ -12,5 +12,8 @@ build_requires:
 provides:
   XML::RSS::LibXML:
     file: lib/XML/RSS/LibXML.pm
-    version: 0.05
-generated_by: Module::Build version 0.2607
+    version: 0.06
+  XML::RSS::LibXML::MagicElement:
+    file: lib/XML/RSS/LibXML/MagicElement.pm
+    version: 0.01
+generated_by: Module::Build version 0.2611

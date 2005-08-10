@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.06 - 10 Aug 2005 ("Magic Is In The Air" Release)
+  - Introduce MagicElement.pm. This allows us to parse RSS elements
+    that have attributes without sacrificing the interface (hopefully).
+    Inspired by patch from Taro Minowa.
+
 0.05 - 04 Jul 2005 ("I'm so dumb" Release)
   - Make $item->{$namespace_uri}->{$tag} work. Patch by Naoya Ito.
   - Add corresponding tests. Patch by Naoya Ito.

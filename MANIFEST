@@ -2,6 +2,7 @@ benchmark.pl
 Build.PL
 Changes
 lib/XML/RSS/LibXML.pm
+lib/XML/RSS/LibXML/MagicElement.pm
 MANIFEST			This list of files
 t/0.9-parse.t
 t/1.0-parse.t
