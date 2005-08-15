@@ -1,15 +1,17 @@
-# $Id: 2.0-parse.t 2 2005-06-14 02:52:09Z daisuke $
+# $Id: 2.0-parse.t 15 2005-08-10 09:01:40Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 use strict;
-use Test::More;
+use Test::More (tests => 15);
+BEGIN { use_ok("XML::RSS::LibXML") }
 
 use constant RSS_VERSION       => "2.0";
 use constant RSS_CHANNEL_TITLE => "Example 2.0 Channel";
 
-use constant RSS_DOCUMENT      => qq(<?xml version="1.0"?>
+use constant RSS_DOCUMENT      => <<EORSS;
+<?xml version="1.0"?>
 <rss version="2.0">
  <channel>
   <title>Example 2.0 Channel</title>
@@ -48,11 +50,8 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0"?>
   </item>
 
  </channel>
-</rss>);
-
-plan tests => 12;
-
-use_ok("XML::RSS::LibXML");
+</rss>
+EORSS
 
 my $xml = XML::RSS::LibXML->new();
 isa_ok($xml,"XML::RSS::LibXML");
@@ -60,29 +59,21 @@ isa_ok($xml,"XML::RSS::LibXML");
 eval { $xml->parse(RSS_DOCUMENT); };
 is($@,'',"Parsed RSS feed");
 
-cmp_ok($xml->{'_internal'}->{'version'},"eq",RSS_VERSION,"Is RSS version ".RSS_VERSION);
-cmp_ok($xml->{channel}->{'title'},"eq",RSS_CHANNEL_TITLE,"Feed title is ".RSS_CHANNEL_TITLE);
-cmp_ok(ref($xml->{items}),"eq","ARRAY","\$xml->{items} is an ARRAY ref");
+is($xml->{'_internal'}->{'version'}, RSS_VERSION,"Is RSS version ".RSS_VERSION);
+is($xml->{channel}->{'title'},RSS_CHANNEL_TITLE,"Feed title is ".RSS_CHANNEL_TITLE);
+is(ref($xml->{items}),"ARRAY","\$xml->{items} is an ARRAY ref");
 is($xml->{channel}->{category}, 'Reference/Libraries/Library_and_Information_Science/Technical_Services/Cataloguing/Metadata/RDF/Applications/RSS/', "channel category matches");
 is($xml->{channel}->{category}->{domain}, 'http://www.dmoz.org', "channel category domain attribute matches");
-my $ok = 1;
 
 foreach my $item (@{$xml->{items}}) {
-
-  my $min = 0;
   foreach my $el ("title","description") {
-    if (exists $item->{$el}) {
-      $min ||= 1;
-    }
+    ok($item->{$el}, "$el exists for $item->{link}");
   }
-
-  $ok = $min;
-  last if (! $ok);
 }
 
-cmp_ok($xml->{items}->[1]->{enclosure}->{url},"eq",'http://example.com/podcast/20020901.mp3');
-cmp_ok($xml->{items}->[1]->{enclosure}->{type},"eq",'audio/mpeg');
-cmp_ok($xml->{items}->[1]->{enclosure}->{length},"eq",'4096');
+my $enclosure = $xml->{items}->[1]->{enclosure};
+is($enclosure->{url},'http://example.com/podcast/20020901.mp3', 'enclosure url ok');
+is($enclosure->{type},'audio/mpeg', 'enclosure type ok');
+is($enclosure->{length}, '4096', 'ebnclosure length ok');
 
-ok($ok,"All items have either a title or a description element");
 

@@ -1,4 +1,4 @@
-# $Id$
+# $Id: MagicElement.pm 15 2005-08-10 09:01:40Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -9,7 +9,8 @@ use overload
     '""' => \&toString,
     fallback => 1
 ;
-our $VERSION = '0.01';
+use vars qw($VERSION);
+$VERSION = '0.01';
 
 sub new
 {

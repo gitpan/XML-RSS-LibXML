@@ -1,11 +1,12 @@
-# $Id: LibXML.pm 14 2005-07-04 01:47:31Z daisuke $
+# $Id: LibXML.pm 15 2005-08-10 09:01:40Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-our $VERSION = '0.06';
+use vars qw($VERSION);
+$VERSION = '0.07';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;
@@ -37,10 +38,8 @@ sub new
     my $p = XML::LibXML->new();
     $p->recover(1);
 
-    my $c = XML::LibXML::XPathContext->new();
     my $self = bless {
         _parser => $p,
-        _context => $c,
         _namespaces => {}
     }, $class;
 
@@ -62,7 +61,6 @@ sub add_module
 {
     my $self = shift;
     my %args = @_;
-    $self->{_context}->registerNs($args{prefix}, $args{uri});
     $self->{_namespaces}->{$args{prefix}} = $args{uri};
 }
 
@@ -108,19 +106,15 @@ sub _parse_dom
 {
     my $self = shift;
 
-    $self->{_internal}->{version} = $self->_guess_version();
-    $self->{channel} = $self->_parse_channel;
-    $self->{items} = $self->_parse_items;
-}
-
-sub _xpath_context
-{
-    my $self = shift;
-    my $xc  = XML::LibXML::XPathContext->new();
+    my $xc = XML::LibXML::XPathContext->new();
     while (my($prefix, $namespace) = each %{$self->{_namespaces}}) {
         $xc->registerNs($prefix, $namespace);
     }
-    return $xc;
+    $self->{_context} = $xc;
+    $self->{_internal}->{version} = $self->_guess_version();
+    $self->{channel} = $self->_parse_channel;
+    $self->{items} = $self->_parse_items;
+    delete $self->{_context};
 }
 
 sub _guess_version
@@ -129,7 +123,7 @@ sub _guess_version
     $self->{_dom} or die;
 
     my $dom = $self->{_dom};
-    my $xc  = $self->_xpath_context();
+    my $xc  = $self->{_context};
 
     # Test starting from the most likely candidate
     if ($xc->findnodes('/rdf:RDF', $dom)) {
@@ -146,32 +140,6 @@ sub _guess_version
     return 'UNKNOWN';
 }
 
-sub grab_data
-{
-    my($self, $node, $xc, $candidates) = @_;
-    return unless $candidates;
-
-    my $xpath;
-    my $version = $self->{_internal}->{version};
-    foreach my $xp (@$candidates) {
-        if ($xp !~ /^[^:]+:/ && $VersionPrefix{$version}) {
-            $xpath = $VersionPrefix{$version} . ":$xp";
-        } else {
-            $xpath = $xp;
-        }
-        if (my($v) = eval { $xc->findnodes($xpath, $node) }) {
-            my %data;
-            if (my $prefix = $v->prefix) {
-                $data{prefix} = $prefix;
-                $data{name}   = $v->localname;
-            }
-            $data{data} = $v->textContent();
-            return \%data;
-        }
-    }
-    return;
-}
-
 my %ChannelRoot = (
     '1.0' => '/rdf:RDF/rss10:channel',
     '0.9' => '/rdf:RDF/rss09:channel',
@@ -184,7 +152,7 @@ sub _parse_channel
 
     my $dom = $self->{_dom} or die "channel called before parse!";
     my $version = $self->{_internal}->{version};
-    my $xc = $self->_xpath_context;
+    my $xc = $self->{_context};
     my $root_xpath = $ChannelRoot{$version} || $ChannelRoot{other};
 
     if( my ($channel) = $xc->findnodes($root_xpath, $dom)) {
@@ -207,7 +175,7 @@ sub _parse_items
 
     my @items;
     my $version = $self->{_internal}->{version};
-    my $xc = $self->_xpath_context;
+    my $xc = $self->{_context};
     my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
     # grab everything by namespace 
     foreach my $item ($xc->findnodes($root_xpath, $dom)) {
@@ -222,7 +190,7 @@ sub _parse_children
     my $node = shift;
     my $version = $self->{_internal}->{version};
     my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
-    my $xc = $self->_xpath_context;
+    my $xc = $self->{_context};
     my $vprefix = $VersionPrefix{$version};
 
     my %item;
@@ -247,19 +215,24 @@ sub _parse_children
                 $sub{$node->localname} = $node->textContent();
             }
         }
+
         if (keys %sub) {
+            # If this is a native RSS element, we just need to assign to
+            # the %item. otherwise, we need to add it to $prefix and
+            # $namespace
             if ($vprefix eq $prefix) {
                 while (my ($key, $value) = each %sub) {
                     $item{$key} = $value;
                 }
             } else {
                 $item{$prefix} = \%sub;
-		$item{$self->{_namespaces}->{$prefix}} = \%sub;
+                $item{$self->{_namespaces}->{$prefix}} = \%sub;
             }
         }
     }
     return \%item;
 }
+
 1;
 
 __END__
@@ -314,7 +287,29 @@ From now on XML::RSS::LibXML will try to match XML::RSS's functionality as
 much as possible in terms of parsing RSS feeds. Please send in patches and
 any tests that may be useful!
 
-=head1 PARSED FIELDS
+=head1 PARSED STRUCTURE
+
+Once parsed the resulting data structure resembles that of XML::RSS. However,
+as one addition/improvement, XML::RSS::LibXML uses a technique to allow users
+to access complex data structures that XML::RSS doesn't support as of this
+writing.
+
+For example, suppose you have a tag like the following:
+
+  <rss version="2.0">
+  ...
+    <channel>
+      <tag attr1="val1" attr2="val3">foo bar baz</tag>
+    </channel>
+  </rss>
+
+All of the fields in this construct can be accessed like so:
+
+  $rss->channel->{tag}        # "foo bar baz"
+  $rss->channel->{tag}{attr1} # "val1"
+  $rss->channel->{tag}{attr2} # "val2"
+
+See L<XML::RSS::LibXML|XML::RSS::LibXML> for details.
 
 =head1 METHODS
 
@@ -355,8 +350,8 @@ Here's a simple benchmark using benchmark.pl in this distribution:
 
   daisuke@localhost XML-RSS-LibXML$ perl -Mlib=lib benchmark.pl index.rdf 
                Rate        rss rss_libxml
-  rss        8.00/s         --       -97%
-  rss_libxml  262/s      3172%         --
+  rss        4.43/s         --       -87%
+  rss_libxml 35.1/s       694%         --
 
 =head1 CAVEATS
 

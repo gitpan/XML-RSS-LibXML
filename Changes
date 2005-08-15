@@ -3,6 +3,13 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.07 - 15 Aug 205
+  - Document MagicElements in the main docs.
+  - Create XPathContext at parse time, andd call registerNs() only then.
+  - Update benchmark for fairness. 
+  - Changed code to use eh, cleaner Test::More code
+  - Removed unused code
+
 0.06 - 10 Aug 2005 ("Magic Is In The Air" Release)
   - Introduce MagicElement.pm. This allows us to parse RSS elements
     that have attributes without sacrificing the interface (hopefully).
