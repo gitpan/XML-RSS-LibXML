@@ -1,10 +1,10 @@
-# $Id: 2.0-parse.t 15 2005-08-10 09:01:40Z daisuke $
+# $Id: 2.0-parse.t 17 2005-08-17 05:05:21Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 use strict;
-use Test::More (tests => 15);
+use Test::More (tests => 16);
 BEGIN { use_ok("XML::RSS::LibXML") }
 
 use constant RSS_VERSION       => "2.0";
@@ -76,4 +76,6 @@ is($enclosure->{url},'http://example.com/podcast/20020901.mp3', 'enclosure url o
 is($enclosure->{type},'audio/mpeg', 'enclosure type ok');
 is($enclosure->{length}, '4096', 'ebnclosure length ok');
 
-
+my $xml2 = XML::RSS::LibXML->new();
+$xml2->parse($xml->as_string);
+is_deeply($xml, $xml2, "Reparse produces the same structure");

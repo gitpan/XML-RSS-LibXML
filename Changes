@@ -3,6 +3,15 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.08 - 17 Aug 2005 ("Insanity" Release)
+  - In a fit of insanity, I've implemented RSS generation code.
+    Currently RSS version 0.9, 1.0, and 2.0 are supported.
+  - You can now parse RSS, serialize it via as_string(), parse it again, and
+    get (almost) the same structure back.
+  - Separated out RSS parsing/generation code from main module. These modules
+    are loaded as necessary, or by demand.
+  - Updated benchmark.
+
 0.07 - 15 Aug 205
   - Document MagicElements in the main docs.
   - Create XPathContext at parse time, andd call registerNs() only then.

@@ -1,8 +1,8 @@
 ---
 name: XML-RSS-LibXML
-version: 0.07
+version: 0.08
 author: ~
-abstract: XML::RSS with XML::LibXML (parse-only)
+abstract: XML::RSS with XML::LibXML
 license: perl
 requires:
   XML::LibXML: 0
@@ -12,8 +12,20 @@ build_requires:
 provides:
   XML::RSS::LibXML:
     file: lib/XML/RSS/LibXML.pm
-    version: 0.07
+    version: 0.08
+  XML::RSS::LibXML::Format:
+    file: lib/XML/RSS/LibXML/Format.pm
+  XML::RSS::LibXML::Generator:
+    file: lib/XML/RSS/LibXML/Generator.pm
   XML::RSS::LibXML::MagicElement:
     file: lib/XML/RSS/LibXML/MagicElement.pm
     version: 0.01
+  XML::RSS::LibXML::Parser:
+    file: lib/XML/RSS/LibXML/Parser.pm
+  XML::RSS::LibXML::V09:
+    file: lib/XML/RSS/LibXML/V09.pm
+  XML::RSS::LibXML::V10:
+    file: lib/XML/RSS/LibXML/V10.pm
+  XML::RSS::LibXML::V20:
+    file: lib/XML/RSS/LibXML/V20.pm
 generated_by: Module::Build version 0.2611

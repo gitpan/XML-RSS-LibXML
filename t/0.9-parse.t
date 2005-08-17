@@ -1,12 +1,11 @@
-# $Id: 0.9-parse.t 2 2005-06-14 02:52:09Z daisuke $
+# $Id: 0.9-parse.t 17 2005-08-17 05:05:21Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 use strict;
-use Test::More;
-
-plan tests => 7;
+use Test::More (tests => 9);
+BEGIN { use_ok("XML::RSS::LibXML") }
 
 use constant RSS_VERSION       => "0.9";
 use constant RSS_CHANNEL_TITLE => "Example 0.9 Channel";
@@ -35,41 +34,30 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0"?>
   </item>
 </rdf:RDF>);
 
-use_ok("XML::RSS::LibXML");
-
 my $xml = XML::RSS::LibXML->new();
 isa_ok($xml,"XML::RSS::LibXML");
 
 eval { $xml->parse(RSS_DOCUMENT); };
 is($@,'',"Parsed RSS feed");
 
-cmp_ok($xml->{'_internal'}->{'version'},
-       "eq",
+is($xml->{'_internal'}->{'version'},
        RSS_VERSION,
        "Is RSS version ".RSS_VERSION);
 
-cmp_ok($xml->{channel}->{'title'},
-       "eq",
+is($xml->{channel}->{'title'},
        RSS_CHANNEL_TITLE,
        "Feed title is ".RSS_CHANNEL_TITLE);
 
-cmp_ok(ref($xml->{items}),
-       "eq",
+is(ref($xml->{items}),
        "ARRAY",
        "\$xml->{items} is an ARRAY ref");
 
-my $ok = 1;
-
 foreach my $item (@{$xml->{items}}) {
-
-  foreach my $el ("title","link") {
-    if (! exists $item->{$el}) {
-      $ok = 0;
-      last;
+    foreach my $el qw(title) {
+        ok($item->{$el}, "$el exists for item $item->{link}");
     }
-  }
-
-  last if (! $ok);
 }
 
-ok($ok,"All items have title and link elements");
+my $xml2 = XML::RSS::LibXML->new;
+$xml2->parse($xml->as_string);
+is_deeply($xml, $xml2, "Reparse produces same structure");

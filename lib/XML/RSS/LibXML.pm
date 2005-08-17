@@ -1,20 +1,22 @@
-# $Id: LibXML.pm 15 2005-08-10 09:01:40Z daisuke $
+# $Id: LibXML.pm 17 2005-08-17 05:05:21Z daisuke $
 #
-# Daisuke Maki <dmaki@cpan.org>
+# Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.07';
+$VERSION = '0.08';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;
 
+my $LoadedParser = 0;
+my $LoadedGenerator = 0;
 my %namespaces = (
     rdf     => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     dc      => "http://purl.org/dc/elements/1.1/",
-    sy      => "http://purl.org/rss/1.0/modules/syndication/",
+    syn     => "http://purl.org/rss/1.0/modules/syndication/",
     admin   => "http://webns.net/mvcb/",
     content => "http://purl.org/rss/1.0/modules/content/",
     cc      => "http://web.resource.org/cc/",
@@ -24,24 +26,18 @@ my %namespaces = (
     rss09   => "http://my.netscape.com/rdf/simple/0.9/",
 );
 
-my %VersionPrefix = (
-    '2.0' => 'rss20',
-    '1.0' => 'rss10',
-    '0.9' => 'rss09',
-);
-
 sub new
 {
     my $class = shift;
     my %args  = @_;
 
-    my $p = XML::LibXML->new();
-    $p->recover(1);
-
     my $self = bless {
-        _parser => $p,
         _namespaces => {}
     }, $class;
+
+    if ($args{version}) {
+        $self->{output} = $args{version};
+    }
 
     $self->_init();
     return $self;
@@ -61,176 +57,139 @@ sub add_module
 {
     my $self = shift;
     my %args = @_;
+
     $self->{_namespaces}->{$args{prefix}} = $args{uri};
+}
+
+sub _create_parser
+{
+    my $self = shift;
+
+    if (!$LoadedParser) {
+        require XML::RSS::LibXML::Parser;
+        $LoadedParser++;
+    }
+
+    if (! $self->{_parser}) {
+        $self->{_parser} = XML::RSS::LibXML::Parser->new;
+    }
+
+    return $self->{_parser};
 }
 
 sub parse
 {
     my $self = shift;
-
-    my $p = $self->{_parser};
-    my $dom = $p->parse_string(@_);
-    $self->{_dom} = $dom;
-    $self->_parse_dom;
-
+    my $p = $self->_create_parser();
+    $p->parse($self, @_);
     return $self;
 }
 
 sub parsefile
 {
     my $self = shift;
-
-    my $p = $self->{_parser};
-    my $dom = $p->parse_file(@_);
-    $self->{_dom} = $dom;
-    $self->_parse_dom;
+    my $p = $self->_create_parser();
+    $p->parsefile($self, @_);
+    return $self;
 }
 
-sub as_string
+sub save
 {
     my $self = shift;
-    return $self->{_dom} ? $self->{_dom}->toString(1) : undef;
+    my $file = shift;
+
+    open(OUT, ">$file") or Carp::croak("Cannot open file $file for write: $!");
+    print OUT $self->as_string;
+    close(OUT);
 }
 
 sub _elem { $_[0]->{$_[1]} }
 
+sub _create_generator
+{
+    my $self = shift;
+
+    if (!$LoadedGenerator) {
+        require XML::RSS::LibXML::Generator;
+        $LoadedGenerator++;
+    }
+
+    if (! $self->{_generator}) {
+        $self->{_generator} = XML::RSS::LibXML::Generator->new;
+    }
+    return $self->{_generator};
+}
+
 sub channel
 {
     my $self = shift;
-    return $_[0] ? $self->_elem('channel')->{$_[0]} : $self->_elem('channel');
+    if (@_) {
+        my $g = $self->_create_generator();
+        $g->channel($self, @_);
+    }
+    return $self->_elem('channel');
 }
 
-sub items   { shift->_elem('items')   }
+sub image
+{
+    my $self = shift;
+    if (@_) {
+        my $g = $self->_create_generator();
+        $g->image($self, @_);
+    }
+    return $self->_elem('image');
+}
 
-sub _parse_dom
+sub textinput
+{
+    my $self = shift;
+    if (@_) {
+        my $g = $self->_create_generator();
+        $g->textinput($self, @_);
+    }
+    return $self->_elem('textinput');
+}
+
+sub add_item
 {
     my $self = shift;
 
-    my $xc = XML::LibXML::XPathContext->new();
-    while (my($prefix, $namespace) = each %{$self->{_namespaces}}) {
-        $xc->registerNs($prefix, $namespace);
+    if (@_) {
+        my $g = $self->_create_generator();
+        $g->add_item($self, @_);
     }
-    $self->{_context} = $xc;
-    $self->{_internal}->{version} = $self->_guess_version();
-    $self->{channel} = $self->_parse_channel;
-    $self->{items} = $self->_parse_items;
-    delete $self->{_context};
 }
 
-sub _guess_version
-{
-    my $self = shift;
-    $self->{_dom} or die;
+sub items { shift->_elem('items') }
 
-    my $dom = $self->{_dom};
-    my $xc  = $self->{_context};
-
-    # Test starting from the most likely candidate
-    if ($xc->findnodes('/rdf:RDF', $dom)) {
-        # 1.0 or 0.9
-        if ($xc->findnodes('/rdf:RDF/rss10:channel', $dom)) {
-            return '1.0';
-        } else {
-            return '0.9';
-        }
-    } elsif ($xc->findnodes('/rss', $dom)) {
-        # 0.91 or 2.0 -ish
-        return $xc->findvalue('/rss/@version', $dom);
-    }
-    return 'UNKNOWN';
-}
-
-my %ChannelRoot = (
-    '1.0' => '/rdf:RDF/rss10:channel',
-    '0.9' => '/rdf:RDF/rss09:channel',
-    '2.0' => '/rss/channel'
+my %VersionFormatter = (
+    '0.9' => 'XML::RSS::LibXML::V09',
+    '1.0' => 'XML::RSS::LibXML::V10',
+    '2.0' => 'XML::RSS::LibXML::V20'
 );
-sub _parse_channel
+my %LoadedFormatter;
+sub as_string
 {
     my $self = shift;
-    my %args = @_;
+    my $format = @_ ? shift : 1;
 
-    my $dom = $self->{_dom} or die "channel called before parse!";
-    my $version = $self->{_internal}->{version};
-    my $xc = $self->{_context};
-    my $root_xpath = $ChannelRoot{$version} || $ChannelRoot{other};
-
-    if( my ($channel) = $xc->findnodes($root_xpath, $dom)) {
-        return $self->_parse_children($channel);
+    my $fmt_class = $self->{fmt_class};
+    my $version = $self->{output} || $self->{_internal}{version} || '1.0';
+    if (!$fmt_class) {
+        $fmt_class = $VersionFormatter{$version};
     }
-    return undef;
-}
 
-my %ItemRoot = (
-    '1.0'   => '/rdf:RDF/rss10:item',
-    '0.9'   => '/rdf:RDF/rss09:item',
-    '2.0' => '/rss/channel/item'
-);
+    die "No formatter found for RSS version $version" if ! $fmt_class;
 
-sub _parse_items
-{
-    my $self = shift;
-
-    my $dom = $self->{_dom} or die "channel called before parse!";
-
-    my @items;
-    my $version = $self->{_internal}->{version};
-    my $xc = $self->{_context};
-    my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
-    # grab everything by namespace 
-    foreach my $item ($xc->findnodes($root_xpath, $dom)) {
-        push @items, $self->_parse_children($item);
+    if (! $LoadedFormatter{$fmt_class}) {
+        eval "require $fmt_class"; die if $@;
+        $LoadedFormatter{$fmt_class}++;
     }
-    return wantarray ? @items : \@items;
-}
+    
+    my $fmt = $fmt_class->new;
 
-sub _parse_children
-{
-    my $self = shift;
-    my $node = shift;
-    my $version = $self->{_internal}->{version};
-    my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
-    my $xc = $self->{_context};
-    my $vprefix = $VersionPrefix{$version};
-
-    my %item;
-    foreach my $prefix (keys %{$self->{_namespaces}}) {
-        next if $prefix =~ /^rss/ && $prefix ne $vprefix;
-        my %sub;
-
-        # this separates native rss elements with those elements that
-        # are explicitly tagged with a prefix.
-        my $xpath = $prefix eq $vprefix ? 
-            "./*" : "./*[starts-with(name(), '$prefix:')]";
-
-        # now, for each node that we can cover, go and parse
-        foreach my $node ($xc->findnodes($xpath, $node)) {
-            # argh. it has attributes. we do our little hack...
-            if ($node->hasAttributes) {
-                $sub{$node->localname} = XML::RSS::LibXML::MagicElement->new(
-                    content => $node->textContent(),
-                    attributes => [ $node->attributes ]
-                );
-            } else {
-                $sub{$node->localname} = $node->textContent();
-            }
-        }
-
-        if (keys %sub) {
-            # If this is a native RSS element, we just need to assign to
-            # the %item. otherwise, we need to add it to $prefix and
-            # $namespace
-            if ($vprefix eq $prefix) {
-                while (my ($key, $value) = each %sub) {
-                    $item{$key} = $value;
-                }
-            } else {
-                $item{$prefix} = \%sub;
-                $item{$self->{_namespaces}->{$prefix}} = \%sub;
-            }
-        }
-    }
-    return \%item;
+    $self->{encoding} ||= 'UTF-8';
+    $fmt->format($self, $format);
 }
 
 1;
@@ -239,7 +198,7 @@ __END__
 
 =head1 NAME
 
-XML::RSS::LibXML - XML::RSS with XML::LibXML (parse-only)
+XML::RSS::LibXML - XML::RSS with XML::LibXML
 
 =head1 SYNOPSIS
 
@@ -255,6 +214,15 @@ XML::RSS::LibXML - XML::RSS with XML::LibXML (parse-only)
   # Add custom modules
   $rss->add_module(uri => $uri, prefix => $prefix);
 
+  # See docs for XML::RSS for these
+  $rss->channel(...);
+  $rss->add_item(...);
+  $rss->image(...);
+  $rss->textinput(...);
+  $rss->save(...);
+
+  $rss->as_string($format);
+
 =head1 DESCRIPTION
 
 XML::RSS::LibXML uses XML::LibXML (libxml2) for parsing RSS instead of XML::RSS'
@@ -266,22 +234,22 @@ So for a long time I had been using my own version of RSS parser to get the
 maximum speed and efficiency - this is the re-packaged version of that module,
 such that it adheres to the XML::RSS interface.
 
-Use this module when you have severe performance requirements in parsing
+Use this module when you have severe performance requirements working with
 RSS files.
 
 =head1 COMPATIBILITY
 
 There seems to be a bit of confusion as to how compatible XML::RSS::LibXML 
 is with XML::RSS: XML::RSS::LibXML is B<NOT> 100% compatible with XML::RSS. 
-For example, XML::RSS::LibXML is not capable of outputting RSS in
-various formats. It also doesn't do complete parsing of the XML document
+For instance XML::RS::LibXML does not do a complete parsing of the XML document
 because of the way we deal with XPath and libxml's DOM (see CAVEATS below)
 
 On top of that, I originally wrote XML::RSS::LibXML as sort of a fast 
 replacement for XML::RAI, which looked cool in terms of abstracting the 
 various modules.  And therefore versions prior to 0.02 worked more like 
 XML::RAI rather than XML::RSS. That was a mistake in hind sight, so it has
-been addressed.
+been addressed (Since XML::RSS::LibXML version 0.08, it even supports
+writing RSS :)
 
 From now on XML::RSS::LibXML will try to match XML::RSS's functionality as
 much as possible in terms of parsing RSS feeds. Please send in patches and
@@ -309,13 +277,16 @@ All of the fields in this construct can be accessed like so:
   $rss->channel->{tag}{attr1} # "val1"
   $rss->channel->{tag}{attr2} # "val2"
 
-See L<XML::RSS::LibXML|XML::RSS::LibXML> for details.
+See L<XML::RSS::LibXML::MagicElement|XML::RSS::LibXML::MagicElement> for details.
 
 =head1 METHODS
 
-=head2 new
+=head2 new(%args)
 
-Creates a new instance of XML::RSS::LibXML
+Creates a new instance of XML::RSS::LibXML. You may specify a version in the
+constructor args to control which output format as_string() will use.
+
+  XML::RSS::LibXML->new(version => '1.0');
 
 =head2 parse($string)
 
@@ -325,9 +296,23 @@ Parse a string containing RSS.
 
 Parse an RSS file specified by $filename
 
-=head2 as_string()
+=head2 channel(%args)
 
-Return the string representation of the parsed RSS.
+=head2 add_item(%args)
+
+=head2 image(%args)
+
+=head2 textinput(%args)
+
+These methods are used to generate RSS. See the documentation for XML::RSS
+for details. Currently RSS version 0.9, 1.0, and 2.0 are supported.
+
+=head2 as_string($format)
+
+Return the string representation of the parsed RSS. If $format is true, this
+flag is passed to the underlying XML::LibXML object's toString() method.
+
+By default, $format is true.
 
 =head2 add_module(uri =E<gt> $uri, prefix =E<gt> $prefix)
 
@@ -336,7 +321,7 @@ XML::RSS::LibXML understands a few modules by default:
 
     rdf     => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
     dc      => "http://purl.org/dc/elements/1.1/",
-    sy      => "http://purl.org/rss/1.0/modules/syndication/",
+    syn     => "http://purl.org/rss/1.0/modules/syndication/",
     admin   => "http://webns.net/mvcb/",
     content => "http://purl.org/rss/1.0/modules/content/",
     cc      => "http://web.resource.org/cc/",
@@ -350,12 +335,10 @@ Here's a simple benchmark using benchmark.pl in this distribution:
 
   daisuke@localhost XML-RSS-LibXML$ perl -Mlib=lib benchmark.pl index.rdf 
                Rate        rss rss_libxml
-  rss        4.43/s         --       -87%
-  rss_libxml 35.1/s       694%         --
+  rss        4.40/s         --       -86%
+  rss_libxml 32.2/s       633%         --
 
 =head1 CAVEATS
-
-No support whatsover for writing RSS. No plans to support it either.
 
 Only first level data under E<lt>channelE<gt> and E<lt>itemE<gt> tags are
 examined. So if you have complex data, this module will not pick it up.

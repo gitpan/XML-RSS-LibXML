@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 15 2005-08-10 09:01:40Z daisuke $
+# $Id: MagicElement.pm 17 2005-08-17 05:05:21Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,6 +6,7 @@
 package XML::RSS::LibXML::MagicElement;
 use strict;
 use overload 
+    bool => sub { 1 },
     '""' => \&toString,
     fallback => 1
 ;
@@ -16,10 +17,19 @@ sub new
 {
     my $class = shift;
     my %args  = @_;
+
+    my @attrs = @{$args{attributes}};
     return bless {
-        (map { ($_->localname, $_->getValue) } @{$args{attributes}}),
+        (map { ($_->localname, $_->getValue) } @attrs),
+        _attributes => [map { $_->getName }@attrs],
         _content => $args{content},
     }, $class;
+}
+
+sub attributes
+{
+    my $self = shift;
+    return wantarray ? @{$self->{_attributes}} : $self->{_attributes};
 }
 
 sub toString
