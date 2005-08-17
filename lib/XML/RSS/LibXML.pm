@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 17 2005-08-17 05:05:21Z daisuke $
+# $Id: LibXML.pm 18 2005-08-17 10:20:53Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.08';
+$VERSION = '0.09';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;
@@ -343,6 +343,32 @@ Here's a simple benchmark using benchmark.pl in this distribution:
 Only first level data under E<lt>channelE<gt> and E<lt>itemE<gt> tags are
 examined. So if you have complex data, this module will not pick it up.
 For most of the cases, this will suffice, though.
+
+Some of the structures will need to be handled via 
+XML::RSS::LibXML::MagicElement. For example, XML::RSS's SYNOPSIS shows
+a snippet like this:
+
+  $rss->add_item(title => "GTKeyboard 0.85",
+     # creates a guid field with permaLink=true
+     permaLink  => "http://freshmeat.net/news/1999/06/21/930003829.html",
+     # alternately creates a guid field with permaLink=false
+     # guid     => "gtkeyboard-0.85
+     enclosure   => { url=> 'http://example.com/torrent', type=>"application/x-bittorrent" },
+     description => 'blah blah'
+  );
+
+However, the enclosure element will need to be an object:
+
+  enclosure => XML::RSS::LibXML::MagicElement->new(
+    attributes => {
+       url => 'http://example.com/torrent', 
+       type=>"application/x-bittorrent" 
+    },
+  );
+
+Also, some elements such as permaLink elements are not really parsed
+such that it can be serialized and parsed back and force. I could fix
+this, but that would break some compatibility with XML::RSS
 
 =head1 TODO
 

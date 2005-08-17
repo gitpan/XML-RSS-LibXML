@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 17 2005-08-17 05:05:21Z daisuke $
+# $Id: MagicElement.pm 18 2005-08-17 10:20:53Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -18,10 +18,22 @@ sub new
     my $class = shift;
     my %args  = @_;
 
-    my @attrs = @{$args{attributes}};
+    my %attrs;
+    my @attrs;
+    my $attrs = $args{attributes};
+    if (ref($attrs) eq 'ARRAY') {
+        %attrs = map { ($_->localname, $_->getValue) } @$attrs;
+        @attrs = map { $_->getName } @$attrs;
+    } elsif (ref($attrs) eq 'HASH') {
+        %attrs = %$attrs;
+        @attrs = keys %$attrs;
+    } else {
+        die "'attributes' must be an arrayref of XML::LibXML::Attr objects, or a hashref of scalars";
+    }
+
     return bless {
-        (map { ($_->localname, $_->getValue) } @attrs),
-        _attributes => [map { $_->getName }@attrs],
+        %attrs,
+        _attributes => \@attrs,
         _content => $args{content},
     }, $class;
 }

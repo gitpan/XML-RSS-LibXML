@@ -3,6 +3,14 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.09 - 17 Aug 2005
+  - Various fixes to make $rss->parse($rss->as_string) work. However,
+    it turns out that since XML::RSS doesn't parse <-> generate RSS
+    in a way that allows 100% of the cases to work, I've decided to
+    stop it at a "good enough" state.
+  - taxo: parses correctly
+  - use exists() to prevent autovivification
+
 0.08 - 17 Aug 2005 ("Insanity" Release)
   - In a fit of insanity, I've implemented RSS generation code.
     Currently RSS version 0.9, 1.0, and 2.0 are supported.

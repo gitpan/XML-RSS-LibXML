@@ -1,4 +1,4 @@
-# $Id: V20.pm 17 2005-08-17 05:05:21Z daisuke $
+# $Id: V20.pm 18 2005-08-17 10:20:53Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -7,7 +7,20 @@ package XML::RSS::LibXML::V20;
 use strict;
 use base qw(XML::RSS::LibXML::Format);
 
+my %DcElements = (
+    (map { ("dc:$_" => [ { module => 'dc', element => $_ } ]) }
+        qw(language rights date publisher creator title subject description contributer type format identifier source relation coverage)),
+);
+
+my %SynElements = (
+    (map { ("syn:$_" => [ { module => 'syn', element => $_ } ]) }
+        qw(updateBase updateFrequency updatePeriod)),
+);
+
 my %ChannelElements = (
+    %DcElements,
+    %SynElements,
+    (map { ($_ => [ $_ ]) } qw(title link description)),
     language => [ { module => 'dc', element => 'language' }, 'language' ],
     copyright => [ { module => 'dc', element => 'rights' }, 'copyright' ],
     pubDate   => [ 'pubDate', { module => 'dc', element => 'date' } ],
@@ -41,17 +54,11 @@ sub format
     my $channel = $xml->createElement('channel');
     $root->appendChild($channel);
 
-    foreach my $p qw(title link description) {
-        $node = $xml->createElement($p);
-        $node->appendText($rss->{channel}{$p});
-        $channel->addChild($node);
-    }
-
     my($value, $module, $element);
 
     $self->_populate_from_spec($xml, $channel, $rss->{channel}, \%ChannelElements);
 
-    if ($rss->{image}) {
+    if (exists $rss->{image}) {
         my $image = $xml->createElement('image');
         foreach my $e (@ImageElements) {
             $node = $xml->createElement($e);
@@ -78,7 +85,8 @@ sub format
         # Be compatible with XML::RSS if the node isn't MagicElement
         # for enclosure, source, and guid
 
-        if (my $e = $item->{enclosure}) {
+        if (exists $item->{enclosure}) {
+            my $e = $item->{enclosure};
             $node = $xml->createElement('enclosure');
             if (eval { $e->isa('XML::RSS::LibXML::MagicElement') }) {
                 $self->_populate_node($node, $inode, $e);
@@ -90,7 +98,7 @@ sub format
             }
         }
 
-        if (my $source = $item->{source}) {
+        if (exists $item->{source} && (my $source = $item->{source})) {
             $node = $xml->createElement('source');
             if (eval { $source->isa('XML::RSS::LibXML::MagicElement') }) {
                 $self->_populate_node($node, $inode, $source);
@@ -119,7 +127,7 @@ sub format
         $channel->appendChild($inode);
     }
 
-    if ($rss->{textinput} && $rss->{textinput}{link}) {
+    if (exists $rss->{textinput} && $rss->{textinput}{link}) {
         my $textinput = $xml->createElement('textInput');
         foreach my $e (@TextInputElements) {
             $node = $xml->createElement($e);
@@ -129,7 +137,7 @@ sub format
         $channel->appendChild($textinput);
     }
 
-    if ($rss->{skipHours} && $rss->{skipHours}{hour}) {
+    if (exists $rss->{skipHours} && $rss->{skipHours}{hour}) {
         my $skip = $xml->createElement('skipHours');
         $node = $xml->createElement('hour');
         $node->appendText($rss->{skipHours}{hour});
@@ -137,7 +145,7 @@ sub format
         $channel->appendChild($skip);
     }
 
-    if ($rss->{skipDays} && $rss->{skipDays}{day}) {
+    if (exists $rss->{skipDays} && $rss->{skipDays}{day}) {
         my $skip = $xml->createElement('skipDays');
         $node = $xml->createElement('day');
         $node->appendText($rss->{skipDays}{day});

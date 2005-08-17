@@ -1,4 +1,4 @@
-# $Id: V09.pm 17 2005-08-17 05:05:21Z daisuke $
+# $Id: V09.pm 18 2005-08-17 10:20:53Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -10,7 +10,7 @@ use constant RDF_NAMESPACE => "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 use constant DEFAULT_NAMESPACE => "http://my.netscape.com/rdf/simple/0.9/";
 
 my @ChannelElements = qw(title link description);
-my @ImageElements = qw(title link description);
+my @ImageElements = qw(title link description url);
 my @ItemElements = qw(title link);
 my @TextInputElements = qw(title description name link);
 sub format
@@ -38,6 +38,7 @@ sub format
     if ($rss->{image}) {
         my $image = $xml->createElement('image');
         foreach my $e (@ImageElements) {
+            next if !exists $rss->{image} || !exists $rss->{image}{$e};
             $node = $xml->createElement($e);
             $node->appendText($rss->{image}{$e});
             $image->addChild($node);

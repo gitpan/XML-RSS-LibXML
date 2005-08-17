@@ -15,3 +15,4 @@ META.yml
 t/0.9-parse.t
 t/1.0-parse.t
 t/2.0-parse.t
+t/synopsis.t

@@ -1,4 +1,3 @@
-# $Id: V10.pm 17 2005-08-17 05:05:21Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -83,23 +82,15 @@ sub format
 
     $self->_populate_from_spec($xml, $channel, $rss->{channel}, \%ChannelElements);
 
-    if ($rss->{channel} && $rss->{channel}{taxo}) {
-        my $topic = $xml->createElement('taxo:topics');
-        my $bag   = $xml->createElement('rdf:Bag');
-        foreach my $taxo (@{$rss->{channel}{taxo}}) {
-            $node = $xml->createElement('rdf:li');
-            $node->setAttribute(resource => $taxo);
-            $bag->appendChild($node);
-        }
-        $topic->appendChild($bag);
-        $channel->appendChild($topic);
+    if (exists $rss->{channel} && $rss->{channel}{taxo}) {
+        $self->_populate_taxo($xml, $channel, $rss->{channel}{taxo}, $rss->{_namespaces});
     }
 
     # XXX - do Ad-hoc modules
     $self->_populate_extra_modules($xml, $channel, $rss->{channel}, $rss->{_namespaces});
 
 
-    if ($rss->{image}) {
+    if (exists $rss->{image}) {
         my $inode;
 
         $inode = $xml->createElement('image');
@@ -110,9 +101,10 @@ sub format
         $inode->setAttribute('rdf:resource', $rss->{image}{url});
         $self->_populate_from_spec($xml, $inode, $rss->{image}, \%ImageElements);
         $self->_populate_extra_modules($xml, $inode, $rss->{image}, $rss->{_namespaces});
+        $root->appendChild($inode);
     }
 
-    if ($rss->{textinput}) {
+    if (exists $rss->{textinput}) {
         my $inode;
 
         $inode = $xml->createElement('textinput');
@@ -121,8 +113,10 @@ sub format
 
         $inode = $xml->createElement('textinput');
         $inode->setAttribute('rdf:resource', $rss->{textinput}{link});
-        $self->_populate_from_spec($xml, $inode, $rss->{textinput}, \%ImageElements);
+        $self->_populate_from_spec($xml, $inode, $rss->{textinput}, \%TextInputElements);
         $self->_populate_extra_modules($xml, $inode, $rss->{textinput}, $rss->{_namespaces});
+
+        $root->appendChild($inode);
     }
 
     if ($rss->{items}) {
@@ -138,6 +132,8 @@ sub format
 
             $self->_populate_from_spec($xml, $inode, $item, \%ItemElements);
             $self->_populate_extra_modules($xml, $inode, $item, $rss->{_namespaces});
+
+            $self->_populate_taxo($xml, $inode, $item->{taxo}, $self->{_namespaces});
             $root->appendChild($inode);
         }
         $items->appendChild($seq);
@@ -148,6 +144,29 @@ sub format
     $root->setNamespace(RDF_NAMESPACE, 'rdf', 1);
 
     $xml->toString($format, 1);
+}
+
+sub _populate_taxo
+{
+    my $self = shift;
+    my $xml  = shift;
+    my $parent = shift;
+    my $taxolist = shift;
+    my $namespaces = shift;
+
+    return if !$taxolist || !scalar(@$taxolist);
+
+    my $topic = $xml->createElement('taxo:topics');
+    my $bag   = $xml->createElement('rdf:Bag');
+    foreach my $taxo (@$taxolist) {
+        my $node = $xml->createElement('rdf:li');
+        $node->setAttribute(resource => $taxo);
+        $bag->appendChild($node);
+    }
+    $topic->appendChild($bag);
+    $parent->appendChild($topic);
+
+    $self->{_modules}{taxo} = $namespaces->{taxo};
 }
 
 sub _populate_extra_modules

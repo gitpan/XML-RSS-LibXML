@@ -1,4 +1,4 @@
-# $Id: Parser.pm 17 2005-08-17 05:05:21Z daisuke $
+# $Id: Parser.pm 18 2005-08-17 10:20:53Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -46,33 +46,63 @@ sub parsefile
     $self->_parse_dom($rss, $dom);
 }
 
+sub _create_context
+{
+    my $self = shift;
+    my $xc = XML::LibXML::XPathContext->new();
+    while (my($prefix, $namespace) = each %{$self->{_namespaces}}) {
+        $xc->registerNs($prefix, $namespace);
+    }
+    return $xc;
+}
+
+my %Root = (
+    '1.0' => '/rdf:RDF',
+    '0.9' => '/rdf:RDF',
+    '2.0' => '/rss'
+);
+    
 sub _parse_dom
 {
     my $self = shift;
     my $rss  = shift;
     my $dom  = shift;
 
-    $self->{_namespaces} = $rss->{_namespaces};
-
-    my $xc = XML::LibXML::XPathContext->new();
-    while (my($prefix, $namespace) = each %{$self->{_namespaces}}) {
-        $xc->registerNs($prefix, $namespace);
-    }
-    $self->{_context} = $xc;
+    my $root = $dom->getDocumentElement();
+    $self->{_namespaces} = {
+        %{$rss->{_namespaces}}, 
+        map { ($_->getPrefix() => $_->getNamespaceURI()) }
+            grep { $_->getPrefix() }
+            $root->getNamespaces
+    };
+    $self->{_context} = $self->_create_context;
 
     my $version = $self->_guess_version($dom);
 
     $rss->{encoding} = $dom->encoding();
     $rss->{_internal}->{version} = $version;
+    $rss->{output} = $version;
     $rss->{channel} = $self->_parse_channel($version, $dom);
+
     $rss->{items} = $self->_parse_items($version, $dom);
 
-    my $root = $dom->getDocumentElement();
-    my %namespaces = (%{$rss->{_namespaces}}, 
-        map { ($_->getPrefix() => $_->getNamespaceURI()) }
-        grep { $_->getPrefix() }
-        $root->getNamespaces);
-    $rss->{_namespaces} = \%namespaces;
+    foreach my $node ($self->{_context}->findnodes($Root{$version} . '/*[name() != "channel" and name() != "item"]', $dom)) {
+        my $h = $self->_parse_children($version, $node);
+        if (my $prefix = $node->getPrefix()) {
+            $rss->{$prefix}{$node->localname} = $h;
+        } else {
+            $rss->{$node->localname} = $h;
+        }
+    }
+
+    if ($version eq '2.0') {
+        $rss->{image} = $rss->{channel}{image}
+            if exists $rss->{channel} && exists $rss->{channel}{image};
+        $rss->{textinput} = $rss->{channel}{textInput}
+            if exists $rss->{channel}{textInput};
+    }
+
+    $rss->{_namespaces} = $self->{_namespaces};
 
     delete $self->{_context};
     delete $self->{_namespaces};
@@ -113,17 +143,39 @@ sub _parse_channel
     my $xc = $self->{_context};
     my $root_xpath = $ChannelRoot{$version} || $ChannelRoot{other};
 
+    my $h;
     if( my ($channel) = $xc->findnodes($root_xpath, $dom)) {
-        my $h = $self->_parse_children($version, $channel);
+        $h = $self->_parse_children($version, $channel);
         delete $h->{item};
-        return $h;
+        delete $h->{taxo};
+
+        $self->_parse_taxo($h, $channel);
     }
-    return undef;
+
+    return $h;
+}
+
+sub _parse_taxo
+{
+    my $self = shift;
+    my $h    = shift;
+    my $xml  = shift;
+
+    my $xc = $self->{_context};
+    my @nodes = $xc->findnodes('taxo:topics/rdf:Bag/rdf:li', $xml);
+
+    return if !@nodes;
+
+    $h->{taxo} ||= [];
+    foreach my $p (@nodes) {
+        push @{$h->{taxo}}, $p->findvalue('@resource');
+    }
+    $h->{$self->{_namespaces}{taxo}} = $h->{taxo};
 }
 
 my %ItemRoot = (
-    '1.0'   => '/rdf:RDF/rss10:item',
-    '0.9'   => '/rdf:RDF/rss09:item',
+    '1.0' => '/rdf:RDF/rss10:item',
+    '0.9' => '/rdf:RDF/rss09:item',
     '2.0' => '/rss/channel/item'
 );
 
@@ -138,7 +190,11 @@ sub _parse_items
     my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
     # grab everything by namespace 
     foreach my $item ($xc->findnodes($root_xpath, $dom)) {
-        push @items, $self->_parse_children($version, $item);
+        my $i = $self->_parse_children($version, $item);
+        delete $i->{taxo};
+        $self->_parse_taxo($i, $item);
+
+        push @items, $i;
     }
     return \@items;
 }
@@ -147,7 +203,7 @@ sub _parse_children
 {
     my $self    = shift;
     my $version = shift;
-    my $node    = shift;
+    my $root    = shift;
 
     my $root_xpath = $ItemRoot{$version} || $ItemRoot{other};
     my $xc = $self->{_context};
@@ -161,23 +217,29 @@ sub _parse_children
         # this separates native rss elements with those elements that
         # are explicitly tagged with a prefix.
         my $xpath = $prefix eq $vprefix ? 
-            "./*" : "./*[starts-with(name(), '$prefix:')]";
+            "./*[not(contains(name(), ':'))]" : "./*[starts-with(name(), '$prefix:')]";
 
         # now, for each node that we can cover, go and parse
-        foreach my $node ($xc->findnodes($xpath, $node)) {
-            my $text = $node->textContent();
-            if ($text !~ /\S/) {
-                $text = '';
-            }
-
-            # argh. it has attributes. we do our little hack...
-            if ($node->hasAttributes) {
-                $sub{$node->localname} = XML::RSS::LibXML::MagicElement->new(
-                    content => $text,
-                    attributes => [ $node->attributes ]
-                );
+        foreach my $node ($xc->findnodes($xpath, $root)) {
+            if ($xc->findnodes('./*', $node)) {
+# print STDERR "Parsing ", $node->getName(), " (recurse)\n";
+                $sub{$node->localname} = $self->_parse_children($version, $node);
             } else {
-                $sub{$node->localname} = $text;
+# print STDERR "Parsing ", $node->getName(), "\n";
+                my $text = $node->textContent();
+                if ($text !~ /\S/) {
+                    $text = '';
+                }
+    
+                # argh. it has attributes. we do our little hack...
+                if ($node->hasAttributes) {
+                    $sub{$node->localname} = XML::RSS::LibXML::MagicElement->new(
+                        content => $text,
+                        attributes => [ $node->attributes ]
+                    );
+                } else {
+                    $sub{$node->localname} = $text;
+                }
             }
         }
 
@@ -195,6 +257,7 @@ sub _parse_children
             }
         }
     }
+
     return \%item;
 }
 
