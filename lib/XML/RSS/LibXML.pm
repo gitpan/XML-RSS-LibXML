@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 18 2005-08-17 10:20:53Z daisuke $
+# $Id: LibXML.pm 20 2005-10-18 09:41:09Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.09';
+$VERSION = '0.10';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;
@@ -37,6 +37,10 @@ sub new
 
     if ($args{version}) {
         $self->{output} = $args{version};
+    }
+
+    if ($args{encoding}) {
+        $self->{encoding} = $args{encoding};
     }
 
     $self->_init();
@@ -160,7 +164,13 @@ sub add_item
     }
 }
 
-sub items { shift->_elem('items') }
+sub items
+{
+    my $items = shift->_elem('items');
+    $items ?
+        (wantarray ? @$items : $items) :
+        (wantarray ? ()      : undef);
+}
 
 my %VersionFormatter = (
     '0.9' => 'XML::RSS::LibXML::V09',
@@ -173,11 +183,8 @@ sub as_string
     my $self = shift;
     my $format = @_ ? shift : 1;
 
-    my $fmt_class = $self->{fmt_class};
     my $version = $self->{output} || $self->{_internal}{version} || '1.0';
-    if (!$fmt_class) {
-        $fmt_class = $VersionFormatter{$version};
-    }
+    my $fmt_class = $VersionFormatter{$version};
 
     die "No formatter found for RSS version $version" if ! $fmt_class;
 
@@ -288,6 +295,11 @@ constructor args to control which output format as_string() will use.
 
   XML::RSS::LibXML->new(version => '1.0');
 
+You can also specify the encoding that you expect this RSS object to use
+when creating an RSS string
+
+  XML::RSS::LiBXML->new(encoding => 'euc-jp');
+
 =head2 parse($string)
 
 Parse a string containing RSS.
@@ -328,6 +340,26 @@ XML::RSS::LibXML understands a few modules by default:
     taxo    => "http://purl.org/rss/1.0/modules/taxonomy/",
 
 So you do not need to add these explicitly.
+
+=head2 save($file)
+
+Saves the RSS to a file
+
+=head2 items()
+
+Syntactic sugar to allow statement like this:
+
+  foreach my $item ($rss->items) {
+    ...
+  }
+
+Instead of 
+
+  foreach my $item (@{$rss->{items}}) {
+    ...
+  }
+
+In scalar context, returns the reference to the list of items.
 
 =head1 PERFORMANCE
 
@@ -381,7 +413,7 @@ L<XML::RSS|XML::RSS>, L<XML::LibXML|XML::LibXML>, L<XML::LibXML::XPathContext>
 
 =head1 AUTHORS
 
-Copyright 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.
+Copyright (c) 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.
 
 Development partially funded by Brazil, Ltd. E<lt>http://b.razil.jpE<gt>
 

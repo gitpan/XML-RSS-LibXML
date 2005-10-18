@@ -1,5 +1,5 @@
 #!perl
-# $Id: Build.PL 5 2005-06-20 05:25:21Z daisuke $
+# $Id: Build.PL 20 2005-10-18 09:41:09Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -19,5 +19,6 @@ my $build = Module::Build->new(
     },
     license => 'perl',
     create_makefile_pl => 'traditional',
+    create_readme => 1,
 );
 $build->create_build_script;

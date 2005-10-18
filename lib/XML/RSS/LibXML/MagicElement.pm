@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 18 2005-08-17 10:20:53Z daisuke $
+# $Id: MagicElement.pm 20 2005-10-18 09:41:09Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -89,6 +89,20 @@ all the elements like so:
   $rss->{channel}->{tag};  # "baz"
   $rss->{channel}->{tag}->{attr1}; # "foo"
   $rss->{channel}->{tag}->{attr2}; # "bar"
+
+=head1 METHODS
+
+=head2 new
+
+Create a new MagicElement object.
+
+=head2 attributes
+
+Returns the list of attributes associated with this element
+
+=head2 toString
+
+Returns the string representation of this object
 
 =head1 AUTHOR
 

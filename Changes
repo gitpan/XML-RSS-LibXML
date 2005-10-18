@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.10 - 18 Oct 2005
+  - Mainly a kwalitee improvement release. Added bunch of POD and tests
+  - Fix: Allow XML::RSS::LibXML constructor to accept encoding. Currently
+    this just controls the output encoding, not the internal representation
+
 0.09 - 17 Aug 2005
   - Various fixes to make $rss->parse($rss->as_string) work. However,
     it turns out that since XML::RSS doesn't parse <-> generate RSS

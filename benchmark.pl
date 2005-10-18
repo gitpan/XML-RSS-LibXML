@@ -8,7 +8,7 @@ my @files = @ARGV;
 my $i_rl = 0;
 my $i_r = 0;
 
-cmpthese(1000, {
+cmpthese(10_000, {
     rss_libxml => \&rss_libxml,
     rss        => \&rss
 });
