@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.11 -
+  - Most files were mysteriously not included in the previous release.
+
 0.10 - 18 Oct 2005
   - Mainly a kwalitee improvement release. Added bunch of POD and tests
   - Fix: Allow XML::RSS::LibXML constructor to accept encoding. Currently

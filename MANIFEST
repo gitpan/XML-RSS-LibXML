@@ -2,11 +2,22 @@ benchmark.pl
 Build.PL
 Changes
 lib/XML/RSS/LibXML.pm
+lib/XML/RSS/LibXML/Format.pm
+lib/XML/RSS/LibXML/Generator.pm
 lib/XML/RSS/LibXML/MagicElement.pm
+lib/XML/RSS/LibXML/Parser.pm
+lib/XML/RSS/LibXML/V09.pm
+lib/XML/RSS/LibXML/V10.pm
+lib/XML/RSS/LibXML/V20.pm
+Makefile.PL
 MANIFEST			This list of files
+META.yml
+README
 t/0.9-parse.t
 t/1.0-parse.t
 t/2.0-parse.t
-META.yml
-Makefile.PL
-README
+t/data/rss20.xml
+t/pod-coverage.t
+t/pod.t
+t/synopsis.t
+t/unsupported.t
