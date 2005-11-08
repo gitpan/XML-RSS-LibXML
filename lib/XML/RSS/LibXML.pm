@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 20 2005-10-18 09:41:09Z daisuke $
+# $Id: LibXML.pm 21 2005-11-08 22:41:58Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.11';
+$VERSION = '0.12';
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;

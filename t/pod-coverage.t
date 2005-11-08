@@ -1,5 +1,12 @@
 #!perl
-eval "use Test::Pod::Coverage";
-plan(skip_all => "Test::Pod::Coverage required for testing POD") if $@;
+use Test::More;
+BEGIN
+{
+    eval "use Test::Pod::Coverage";
+    if ($@) {
+        plan(skip_all => "Test::Pod::Coverage required for testing POD");
+    }
+}
+
 all_pod_coverage_ok();
 
