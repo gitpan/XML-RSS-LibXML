@@ -1,10 +1,11 @@
 ---
 name: XML-RSS-LibXML
-version: 0.12
+version: 0.13
 author: ~
 abstract: XML::RSS with XML::LibXML
 license: perl
 requires:
+  Encode: 0
   XML::LibXML: 0
   XML::LibXML::XPathContext: 0
 build_requires:
@@ -12,7 +13,7 @@ build_requires:
 provides:
   XML::RSS::LibXML:
     file: lib/XML/RSS/LibXML.pm
-    version: 0.12
+    version: 0.13
   XML::RSS::LibXML::Format:
     file: lib/XML/RSS/LibXML/Format.pm
   XML::RSS::LibXML::Generator:

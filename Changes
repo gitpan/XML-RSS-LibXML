@@ -3,6 +3,12 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.13 - 18 Nov 2005
+  - XML::RSS::LibXML wasn't conforming to the XML::RSS interface on
+    channel(), image() and textinput() methods. Reported by
+    Taro Minowa.
+  - Make POD tests run only on disttest
+
 0.12 - 09 Nov 2005
   - Ugh, need to use Test::Pod::Coverage more carefully.
     Reported by various people.

@@ -4,7 +4,7 @@
 # All rights reserved.
 
 use strict;
-use Test::More (tests => 20);
+use Test::More (tests => 21);
 BEGIN { use_ok("XML::RSS::LibXML") }
 
 use constant RSS_VERSION       => "1.0";
@@ -75,6 +75,8 @@ is($xml->{channel}->{'title'},
 is($xml->channel->{'title'},
        RSS_CHANNEL_TITLE,
        "Feed title is ".RSS_CHANNEL_TITLE);
+is($xml->channel('title'), $xml->channel->{title},
+    "Feed title accessor returns the same");
 
 is(ref($xml->{items}),
        "ARRAY",

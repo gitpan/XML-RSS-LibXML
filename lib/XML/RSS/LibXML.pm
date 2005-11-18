@@ -6,7 +6,8 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.12';
+$VERSION = '0.13';
+use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::MagicElement;
@@ -124,10 +125,22 @@ sub _create_generator
     return $self->{_generator};
 }
 
+sub _encode
+{
+    my $self = shift;
+    my $value = shift;
+    return ($self->{encoding}) ?
+        Encode::encode($self->{encoding} || 'UTF-8', $value) :
+        $value;
+}
+
 sub channel
 {
     my $self = shift;
-    if (@_) {
+    if (@_ == 1) { # retrieve
+        my $value = $self->_elem('channel')->{$_[0]};
+        return $self->_encode($value);
+    } elsif (@_) {
         my $g = $self->_create_generator();
         $g->channel($self, @_);
     }
@@ -137,7 +150,10 @@ sub channel
 sub image
 {
     my $self = shift;
-    if (@_) {
+    if (@_ == 1) { # retrieve
+        my $value = $self->_elem('image')->{$_[0]};
+        return $self->_encode($value);
+    } elsif (@_) {
         my $g = $self->_create_generator();
         $g->image($self, @_);
     }
@@ -147,7 +163,10 @@ sub image
 sub textinput
 {
     my $self = shift;
-    if (@_) {
+    if (@_ == 1) { # retrieve
+        my $value = $self->_elem('textinput')->{$_[0]};
+        return $self->_encode($value);
+    } elsif (@_) {
         my $g = $self->_create_generator();
         $g->textinput($self, @_);
     }

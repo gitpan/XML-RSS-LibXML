@@ -4,7 +4,7 @@
 # All rights reserved.
 
 use strict;
-use Test::More (tests => 35);
+use Test::More (tests => 37);
 use File::Temp qw(tempfile unlink0);
 BEGIN { use_ok("XML::RSS::LibXML") }
 
@@ -31,7 +31,8 @@ sub analyze_rss
 
     is($xml->{'_internal'}{'version'}, $version,
         sprintf("Expected version %s, got %s", $version, $xml->{'_internal'}{'version'}));
-    is($xml->{channel}->{'title'},RSS_CHANNEL_TITLE,"Feed title is ".RSS_CHANNEL_TITLE);
+    is($xml->{channel}->{'title'}, RSS_CHANNEL_TITLE, "Feed title is ".RSS_CHANNEL_TITLE);
+    is($xml->channel('title'), $xml->channel->{title}, "Feed title match");
     is(ref($xml->{items}),"ARRAY","\$xml->{items} is an ARRAY ref");
 
     is($xml->{channel}->{category}, 'Reference/Libraries/Library_and_Information_Science/Technical_Services/Cataloguing/Metadata/RDF/Applications/RSS/', "channel category matches");
