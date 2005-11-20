@@ -200,7 +200,7 @@ __END__
 
 =head1 NAME
 
-XML::RS::LibXML::V10 - Format XML::RSS::LibXML in RSS 1.0 Format
+XML::RSS::LibXML::V10 - Format XML::RSS::LibXML in RSS 1.0 Format
 
 =head1 SYNOPSIS
 

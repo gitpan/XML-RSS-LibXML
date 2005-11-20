@@ -66,7 +66,7 @@ __END__
 
 =head1 NAME
 
-XML::RSS::LibXML::Genrator - Provide API to Generate XML::RSS::LibXML
+XML::RSS::LibXML::Generator - Provide API to Generate XML::RSS::LibXML
 
 =head1 SYNOPSIS
 

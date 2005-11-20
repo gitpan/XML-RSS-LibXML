@@ -1,4 +1,4 @@
-# $Id: 1.0-parse.t 17 2005-08-17 05:05:21Z daisuke $
+# $Id: 1.0-parse.t 22 2005-11-18 07:33:44Z daisuke $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

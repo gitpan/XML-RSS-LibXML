@@ -81,7 +81,7 @@ __END__
 
 =head1 NAME
 
-XML::RSS::Format - Base Class To Format XML::RSS::LibXML
+XML::RSS::LibXML::Format - Base Class To Format XML::RSS::LibXML
 
 =head1 SYNOPSIS
 

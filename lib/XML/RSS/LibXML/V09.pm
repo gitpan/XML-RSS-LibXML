@@ -75,7 +75,7 @@ __END__
 
 =head1 NAME
 
-XML::RS::LibXML::V09 - Format XML::RSS::LibXML in RSS 0.9 Format
+XML::RSS::LibXML::V09 - Format XML::RSS::LibXML in RSS 0.9 Format
 
 =head1 SYNOPSIS
 

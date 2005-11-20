@@ -162,7 +162,7 @@ __END__
 
 =head1 NAME
 
-XML::RS::LibXML::V20 - Format XML::RSS::LibXML in RSS 2.0 Format
+XML::RSS::LibXML::V20 - Format XML::RSS::LibXML in RSS 2.0 Format
 
 =head1 SYNOPSIS
 

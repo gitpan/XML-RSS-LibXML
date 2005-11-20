@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.14 - 20 Nov 2005
+  - Bah, stupid POD msitakes. No code change
+
 0.13 - 18 Nov 2005
   - XML::RSS::LibXML wasn't conforming to the XML::RSS interface on
     channel(), image() and textinput() methods. Reported by
