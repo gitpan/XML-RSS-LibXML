@@ -1,4 +1,4 @@
-# $Id: Generator.pm 20 2005-10-18 09:41:09Z daisuke $
+# $Id: Generator.pm 23 2005-12-28 09:18:23Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

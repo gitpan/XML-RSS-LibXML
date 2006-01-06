@@ -1,4 +1,4 @@
-# $Id: Parser.pm 20 2005-10-18 09:41:09Z daisuke $
+# $Id: Parser.pm 23 2005-12-28 09:18:23Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -10,6 +10,7 @@ my %VersionPrefix = (
     '2.0' => 'rss20',
     '1.0' => 'rss10',
     '0.9' => 'rss09',
+    '0.91' => 'rss09'
 );
 
 sub new { bless {}, shift }
@@ -59,7 +60,8 @@ sub _create_context
 my %Root = (
     '1.0' => '/rdf:RDF',
     '0.9' => '/rdf:RDF',
-    '2.0' => '/rss'
+    '2.0' => '/rss',
+    'other' => '/rss'
 );
     
 sub _parse_dom
@@ -86,7 +88,8 @@ sub _parse_dom
 
     $rss->{items} = $self->_parse_items($version, $dom);
 
-    foreach my $node ($self->{_context}->findnodes($Root{$version} . '/*[name() != "channel" and name() != "item"]', $dom)) {
+    my $root_xpath = $Root{$version} || $Root{other};
+    foreach my $node ($self->{_context}->findnodes($root_xpath . '/*[name() != "channel" and name() != "item"]', $dom)) {
         my $h = $self->_parse_children($version, $node);
         if (my $prefix = $node->getPrefix()) {
             $rss->{$prefix}{$node->localname} = $h;
@@ -132,7 +135,8 @@ sub _guess_version
 my %ChannelRoot = (
     '1.0' => '/rdf:RDF/rss10:channel',
     '0.9' => '/rdf:RDF/rss09:channel',
-    '2.0' => '/rss/channel'
+    '2.0' => '/rss/channel',
+    'other' => '/rss/channel'
 );
 sub _parse_channel
 {
@@ -176,7 +180,8 @@ sub _parse_taxo
 my %ItemRoot = (
     '1.0' => '/rdf:RDF/rss10:item',
     '0.9' => '/rdf:RDF/rss09:item',
-    '2.0' => '/rss/channel/item'
+    '2.0' => '/rss/channel/item',
+    'other' => '/rss/channel/item'
 );
 
 sub _parse_items
@@ -221,11 +226,12 @@ sub _parse_children
 
         # now, for each node that we can cover, go and parse
         foreach my $node ($xc->findnodes($xpath, $root)) {
+            my $val;
             if ($xc->findnodes('./*', $node)) {
-# print STDERR "Parsing ", $node->getName(), " (recurse)\n";
-                $sub{$node->localname} = $self->_parse_children($version, $node);
+                # print STDERR "Parsing ", $node->getName(), " (recurse)\n";
+                $val = $self->_parse_children($version, $node);
             } else {
-# print STDERR "Parsing ", $node->getName(), "\n";
+                # print STDERR "Parsing ", $node->getName(), "\n";
                 my $text = $node->textContent();
                 if ($text !~ /\S/) {
                     $text = '';
@@ -233,13 +239,23 @@ sub _parse_children
     
                 # argh. it has attributes. we do our little hack...
                 if ($node->hasAttributes) {
-                    $sub{$node->localname} = XML::RSS::LibXML::MagicElement->new(
+                    $val = XML::RSS::LibXML::MagicElement->new(
                         content => $text,
                         attributes => [ $node->attributes ]
                     );
                 } else {
-                    $sub{$node->localname} = $text;
+                    $val = $text;
                 }
+            }
+            
+            # multiple values for the same key will
+            # be stored as an arrayref instead of a scalar
+            if (!defined $sub{$node->localname}) {
+                $sub{$node->localname} = $val;
+            } elsif (ref $sub{$node->localname} eq 'ARRAY') {
+                push @{ $sub{$node->localname} }, $val;
+            } else {
+                $sub{$node->localname} = [ $sub{$node->localname}, $val ];
             }
         }
 

@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.15 - 06 Jan 2006
+  - Fix cpan #16748, and now we can parse RSS 0.91.
+    Patch provided by aar@cpan.org
+  - Add tests for 0.91
+
 0.14 - 20 Nov 2005
   - Bah, stupid POD msitakes. No code change
 
