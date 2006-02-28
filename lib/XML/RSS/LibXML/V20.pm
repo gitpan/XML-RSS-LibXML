@@ -34,7 +34,12 @@ my %ChannelElements = (
 );
 
 my @ImageElements = qw(title url link width height description);
-my @ItemElements = qw(title link description author category comments pubDate);
+# my @ItemElements  = qw(title link description author category comments pubDate);
+my %ItemElements = (
+    %DcElements,
+    map { ($_ => [$_]) }
+        qw(title link description author category comments pubDate)
+);
 my @TextInputElements = qw(title description name link);
 
 sub format
@@ -71,16 +76,7 @@ sub format
     foreach my $item (@{$rss->{items}}) {
         my $inode = $xml->createElement('item');
 
-        foreach my $e (@ItemElements) {
-            $node = $xml->createElement($e);
-            
-            if (eval { $item->isa('XML::RSS::LibXML::MagicElement') }) {
-                $self->_populate_node($node, $inode, $item);
-            } elsif ($item->{$e}) {
-                $node->appendText($item->{$e});
-                $inode->addChild($node);
-            }
-        }
+        $self->_populate_from_spec($xml, $inode, $item, \%ItemElements);
 
         # Be compatible with XML::RSS if the node isn't MagicElement
         # for enclosure, source, and guid
@@ -152,7 +148,6 @@ sub format
         $skip->appendChild($node);
         $channel->appendChild($skip);
     }
-
     $xml->toString($format, 1);
 }
 

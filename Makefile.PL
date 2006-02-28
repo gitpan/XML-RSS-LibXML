@@ -2,15 +2,15 @@
 use ExtUtils::MakeMaker;
 WriteMakefile
 (
+          'PL_FILES' => {},
+          'INSTALLDIRS' => 'site',
           'DISTNAME' => 'XML-RSS-LibXML',
           'VERSION_FROM' => 'lib/XML/RSS/LibXML.pm',
           'PREREQ_PM' => {
-                           'Encode' => '0',
-                           'Test::More' => '0',
-                           'XML::LibXML' => '0',
-                           'XML::LibXML::XPathContext' => '0'
-                         },
-          'INSTALLDIRS' => 'site',
-          'PL_FILES' => {}
+                           'XML::LibXML::XPathContext' => 0,
+                           'Test::More' => 0,
+                           'XML::LibXML' => 0,
+                           'Encode' => 0
+                         }
         )
 ;

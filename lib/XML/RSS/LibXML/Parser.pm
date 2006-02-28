@@ -228,10 +228,10 @@ sub _parse_children
         foreach my $node ($xc->findnodes($xpath, $root)) {
             my $val;
             if ($xc->findnodes('./*', $node)) {
-                # print STDERR "Parsing ", $node->getName(), " (recurse)\n";
+#                print STDERR "Parsing ", $node->getName(), " (recurse)\n";
                 $val = $self->_parse_children($version, $node);
             } else {
-                # print STDERR "Parsing ", $node->getName(), "\n";
+#                print STDERR "Parsing ", $node->getName(), "\n";
                 my $text = $node->textContent();
                 if ($text !~ /\S/) {
                     $text = '';

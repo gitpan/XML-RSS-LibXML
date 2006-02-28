@@ -20,7 +20,7 @@ sub _populate_namespaces
     my $rss  = shift;
     my $root = shift;
 
-    while (my($prefix, $url) = each %{$self->{_modules}}) {
+    while (my($prefix, $url) = each %{$rss->{_namespaces}}) {
         next if $prefix =~ /^rss\d\d$/;
         if ($rss->{channel}{$prefix} ||
             (ref($rss->{items}) eq 'ARRAY' && grep { $_->{$prefix} } @{ $rss->{items} })) {
@@ -59,7 +59,7 @@ sub _populate_from_spec
                 $rss->{$p};
             if ($value) {
                 if (ref $p) {
-                    $self->{_modules}{$p->{module}} ||= $self->{_namespaces}{$p->{module}}
+                    $self->{_namespaces}{$p->{module}} ||= $self->{_namespaces}{$p->{module}}
                 }
                 $node = $xml->createElement($e);
                 $node->appendText($value);

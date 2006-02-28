@@ -47,7 +47,7 @@ sub analyze_rss
     my $enclosure = $xml->{items}->[1]->{enclosure};
     is($enclosure->{url},'http://example.com/podcast/20020901.mp3', 'enclosure url ok');
     is($enclosure->{type},'audio/mpeg', 'enclosure type ok');
-    is($enclosure->{length}, '4096', 'ebnclosure length ok');
+    is($enclosure->{length}, '4096', 'enclosure length ok');
     
     my $xml2 = XML::RSS::LibXML->new();
     $xml2->parse($xml->as_string);

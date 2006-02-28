@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.16 - 28 Feb 2006
+  - Fix namespace support for RSS 2.0. Reported by various people.
+
 0.15 - 06 Jan 2006
   - Fix cpan #16748, and now we can parse RSS 0.91.
     Patch provided by aar@cpan.org

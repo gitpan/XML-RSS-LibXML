@@ -73,7 +73,7 @@ sub format
     my $channel = $xml->createElement('channel');
     if ($rss->{channel} && $rss->{channel}{about}) {
         $channel->setAttribute('rdf:about', $rss->{channel}{about});
-    } else {
+    } elsif ($rss->{channel} && $rss->{channel}{link}) {
         $channel->setAttribute('rdf:about', $rss->{channel}{link});
     }
     $root->appendChild($channel);
@@ -166,7 +166,7 @@ sub _populate_taxo
     $topic->appendChild($bag);
     $parent->appendChild($topic);
 
-    $self->{_modules}{taxo} = $namespaces->{taxo};
+    $self->{_namespaces}{taxo} = $namespaces->{taxo};
 }
 
 sub _populate_extra_modules
@@ -182,7 +182,7 @@ sub _populate_extra_modules
         next if $prefix =~ /^(?:(?:dc|syn|taxo)|(?:rss\d\d))$/;
         next if ! $rss->{$prefix};
         while (my($e, $value) = each %{$rss->{$prefix}}) {
-            $self->{_modules}{$prefix} ||= $url;
+            $self->{_namespaces}{$prefix} ||= $url;
             $node = $xml->createElement("$prefix:$e");
             if ($RdfResourceFields{$url}{$e}) {
                 $node->setAttribute('rdf:resource', $value);

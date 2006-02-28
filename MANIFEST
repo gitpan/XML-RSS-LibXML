@@ -18,6 +18,7 @@ t/0.91-parse.t
 t/1.0-parse.t
 t/2.0-parse.t
 t/data/rss20.xml
+t/ns-bug.t
 t/pod-coverage.t
 t/pod.t
 t/synopsis.t

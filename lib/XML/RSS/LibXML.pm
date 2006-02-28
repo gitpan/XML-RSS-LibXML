@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.15';
+$VERSION = '0.16';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
