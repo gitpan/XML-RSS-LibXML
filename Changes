@@ -3,6 +3,10 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.17 - 05 Mar 2006
+  - s/getValue/getData/g (reported by Tatsuhiko Miyagawa)
+  - Add caveat: namespaced attributes aren't parsed correctly
+
 0.16 - 28 Feb 2006
   - Fix namespace support for RSS 2.0. Reported by various people.
 

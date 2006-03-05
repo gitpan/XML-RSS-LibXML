@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 23 2005-12-28 09:18:23Z daisuke $
+# $Id: LibXML.pm 25 2006-03-04 23:24:56Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.16';
+$VERSION = '0.17';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -391,11 +391,21 @@ Here's a simple benchmark using benchmark.pl in this distribution:
 
 =head1 CAVEATS
 
-Only first level data under E<lt>channelE<gt> and E<lt>itemE<gt> tags are
+- Only first level data under E<lt>channelE<gt> and E<lt>itemE<gt> tags are
 examined. So if you have complex data, this module will not pick it up.
 For most of the cases, this will suffice, though.
 
-Some of the structures will need to be handled via 
+- Namespace for namespaced attributes aren't properly parsed as part of 
+the structure.  Hopefully your RSS doesn't do something like this:
+
+  <foo bar:baz="whee">
+
+You won't be able to get at "bar" in this case:
+
+  $xml->{foo}{baz}; # "whee"
+  $xml->{foo}{bar}{baz}; # nope
+
+- Some of the structures will need to be handled via 
 XML::RSS::LibXML::MagicElement. For example, XML::RSS's SYNOPSIS shows
 a snippet like this:
 
@@ -417,7 +427,7 @@ However, the enclosure element will need to be an object:
     },
   );
 
-Also, some elements such as permaLink elements are not really parsed
+- Some elements such as permaLink elements are not really parsed
 such that it can be serialized and parsed back and force. I could fix
 this, but that would break some compatibility with XML::RSS
 

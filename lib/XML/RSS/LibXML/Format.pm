@@ -1,4 +1,4 @@
-# $Id: Format.pm 23 2005-12-28 09:18:23Z daisuke $
+# $Id: Format.pm 25 2006-03-04 23:24:56Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

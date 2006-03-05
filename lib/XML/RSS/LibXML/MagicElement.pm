@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 20 2005-10-18 09:41:09Z daisuke $
+# $Id: MagicElement.pm 25 2006-03-04 23:24:56Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -11,7 +11,7 @@ use overload
     fallback => 1
 ;
 use vars qw($VERSION);
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new
 {
@@ -22,7 +22,7 @@ sub new
     my @attrs;
     my $attrs = $args{attributes};
     if (ref($attrs) eq 'ARRAY') {
-        %attrs = map { ($_->localname, $_->getValue) } @$attrs;
+        %attrs = map { ($_->localname, $_->getData) } @$attrs;
         @attrs = map { $_->getName } @$attrs;
     } elsif (ref($attrs) eq 'HASH') {
         %attrs = %$attrs;
