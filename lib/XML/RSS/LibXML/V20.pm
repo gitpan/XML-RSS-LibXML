@@ -1,4 +1,4 @@
-# $Id: V20.pm 25 2006-03-04 23:24:56Z daisuke $
+# $Id: V20.pm 28 2006-03-06 02:59:00Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -77,6 +77,7 @@ sub format
         my $inode = $xml->createElement('item');
 
         $self->_populate_from_spec($xml, $inode, $item, \%ItemElements);
+        $self->_populate_extra_modules($xml, $inode, $item, $rss->{_namespaces});
 
         # Be compatible with XML::RSS if the node isn't MagicElement
         # for enclosure, source, and guid
@@ -149,6 +150,27 @@ sub format
         $channel->appendChild($skip);
     }
     $xml->toString($format, 1);
+}
+
+sub _populate_extra_modules
+{
+    my $self   = shift;
+    my $xml    = shift;
+    my $parent = shift;
+    my $rss    = shift;
+    my $namespaces = shift;
+
+    my $node;
+    while (my($prefix, $url) = each %$namespaces) {
+        next if $prefix =~ /^(?:(?:dc|syn|taxo)|(?:rss\d\d))$/;
+        next if ! $rss->{$prefix};
+        while (my($e, $value) = each %{$rss->{$prefix}}) {
+            $self->{_namespaces}{$prefix} ||= $url;
+            $node = $xml->createElement("$prefix:$e");
+            $node->appendText($value);
+            $parent->appendChild($node);
+        }
+    }
 }
 
 1;

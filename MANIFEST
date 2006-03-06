@@ -22,5 +22,6 @@ t/pod-coverage.t
 t/pod.t
 t/regress-2.0-namespace.t
 t/regress-namespace-attr.t
+t/regress-content-encoded.t
 t/synopsis.t
 t/unsupported.t
