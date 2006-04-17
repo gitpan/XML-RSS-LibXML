@@ -17,11 +17,13 @@ t/0.9-parse.t
 t/0.91-parse.t
 t/1.0-parse.t
 t/2.0-parse.t
+t/data/rss-euc.xml
 t/data/rss20.xml
 t/pod-coverage.t
 t/pod.t
 t/regress-2.0-namespace.t
-t/regress-namespace-attr.t
 t/regress-content-encoded.t
+t/regress-encoding.t
+t/regress-namespace-attr.t
 t/synopsis.t
 t/unsupported.t

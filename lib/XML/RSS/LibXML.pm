@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.18';
+$VERSION = '0.19';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -139,7 +139,7 @@ sub channel
     my $self = shift;
     if (@_ == 1) { # retrieve
         my $value = $self->_elem('channel')->{$_[0]};
-        return $self->_encode($value);
+        return $value;
     } elsif (@_) {
         my $g = $self->_create_generator();
         $g->channel($self, @_);
@@ -152,7 +152,7 @@ sub image
     my $self = shift;
     if (@_ == 1) { # retrieve
         my $value = $self->_elem('image')->{$_[0]};
-        return $self->_encode($value);
+        return $value;
     } elsif (@_) {
         my $g = $self->_create_generator();
         $g->image($self, @_);
@@ -165,7 +165,7 @@ sub textinput
     my $self = shift;
     if (@_ == 1) { # retrieve
         my $value = $self->_elem('textinput')->{$_[0]};
-        return $self->_encode($value);
+        return $value;
     } elsif (@_) {
         my $g = $self->_create_generator();
         $g->textinput($self, @_);

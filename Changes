@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.19 - 17 Apr 2006
+  - Fixed bug where $rss->channel('title') and such would give you the
+    non-UTF8 representation when another encoding is specified in the
+    RSS document (reported by Tatsuhiko Miyagawa)
+
 0.18 - 06 Mar 2006
   - Fixed bug where extra modules were not included in the output string.
     (reported by Tatsuhiko Miyagawa)
