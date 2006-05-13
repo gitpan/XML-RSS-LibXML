@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.19';
+$VERSION = '0.20';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -38,6 +38,7 @@ sub new
 
     if ($args{version}) {
         $self->{output} = $args{version};
+        $self->{version} = $args{version};
     }
 
     if ($args{encoding}) {
@@ -202,7 +203,7 @@ sub as_string
     my $self = shift;
     my $format = @_ ? shift : 1;
 
-    my $version = $self->{output} || $self->{_internal}{version} || '1.0';
+    my $version = $self->{output} || $self->{version} || '1.0';
     my $fmt_class = $VersionFormatter{$version};
 
     die "No formatter found for RSS version $version" if ! $fmt_class;

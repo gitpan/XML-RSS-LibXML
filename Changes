@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.20 - 14 May 2006
+  - Set $rss->{version} for compatibility.
+
 0.19 - 17 Apr 2006
   - Fixed bug where $rss->channel('title') and such would give you the
     non-UTF8 representation when another encoding is specified in the

@@ -82,7 +82,8 @@ sub _parse_dom
     my $version = $self->_guess_version($dom);
 
     $rss->{encoding} = $dom->encoding();
-    $rss->{_internal}->{version} = $version;
+    $rss->{_internal}{version} = $version;
+    $rss->{version} = $version;
     $rss->{output} = $version;
     $rss->{channel} = $self->_parse_channel($version, $dom);
 
