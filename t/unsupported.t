@@ -9,6 +9,6 @@ eval { $xml->as_string };
 ok($@, "formatting non-supported version 1.5");
 
 delete $xml->{output};
-$xml->{_internal}{version} = '1.5';
+$xml->{version} = '1.5';
 eval { $xml->as_string };
 ok($@, "formatting non-supported version 1.5");

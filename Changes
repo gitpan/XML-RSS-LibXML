@@ -3,8 +3,14 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.21 - 31 May 2006
+  - Repository blunder messes up the distro. fixed.
+    Reported by Tatsuhiko Miyagawa
+
 0.20 - 14 May 2006
   - Set $rss->{version} for compatibility.
+  - As a result, we no longer set or depend on $rss->{_internal}{version}.
+    If you saw it and used it, then stop doing that ;)
 
 0.19 - 17 Apr 2006
   - Fixed bug where $rss->channel('title') and such would give you the

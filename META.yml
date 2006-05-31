@@ -1,6 +1,6 @@
 ---
 name: XML-RSS-LibXML
-version: 0.20
+version: 0.21
 author:
   - 'Copyright (c) 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.'
 abstract: XML::RSS with XML::LibXML
@@ -16,7 +16,7 @@ build_requires:
 provides:
   XML::RSS::LibXML:
     file: lib/XML/RSS/LibXML.pm
-    version: 0.20
+    version: 0.21
   XML::RSS::LibXML::Format:
     file: lib/XML/RSS/LibXML/Format.pm
   XML::RSS::LibXML::Generator:
