@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 29 2006-05-31 11:10:14Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML.pm 1110 2006-05-31T11:10:14.016366Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.21';
+$VERSION = '0.22';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;
@@ -206,11 +206,7 @@ sub as_string
     my $version = $self->{output} || $self->{version} || '1.0';
     my $fmt_class = $VersionFormatter{$version};
 
-use Data::Dumper;
-print Dumper(\%VersionFormatter);
     die "No formatter found for RSS version $version" if ! $fmt_class;
-
-print "fmt_class = $fmt_class\n";
 
     if (! $LoadedFormatter{$fmt_class}) {
         eval "require $fmt_class"; die if $@;

@@ -1,13 +1,10 @@
-benchmark.pl
 Build.PL
 Changes
 lib/XML/RSS/LibXML.pm
-lib/XML/RSS/LibXML.pm.orig
 lib/XML/RSS/LibXML/Format.pm
 lib/XML/RSS/LibXML/Generator.pm
 lib/XML/RSS/LibXML/MagicElement.pm
 lib/XML/RSS/LibXML/Parser.pm
-lib/XML/RSS/LibXML/Parser.pm.orig
 lib/XML/RSS/LibXML/V09.pm
 lib/XML/RSS/LibXML/V10.pm
 lib/XML/RSS/LibXML/V20.pm
@@ -27,3 +24,4 @@ t/regress-content-encoded.t
 t/regress-namespace-attr.t
 t/synopsis.t
 t/unsupported.t
+tools/benchmark.pl

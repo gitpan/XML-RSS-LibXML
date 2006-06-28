@@ -1,4 +1,4 @@
-# $Id: Generator.pm 23 2005-12-28 09:18:23Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/Generator.pm 1104 2005-12-28T09:18:23.970746Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

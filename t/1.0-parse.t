@@ -1,4 +1,4 @@
-# $Id: 1.0-parse.t 22 2005-11-18 07:33:44Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/t/1.0-parse.t 1103 2005-11-18T07:33:44.704855Z daisuke  $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

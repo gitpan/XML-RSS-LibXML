@@ -1,4 +1,4 @@
-# $Id: synopsis.t 18 2005-08-17 10:20:53Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/t/synopsis.t 1099 2005-08-17T10:20:53.231582Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

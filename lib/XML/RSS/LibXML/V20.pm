@@ -1,4 +1,4 @@
-# $Id: V20.pm 28 2006-03-06 02:59:00Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/V20.pm 1109 2006-03-06T02:59:00.668961Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

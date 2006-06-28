@@ -1,4 +1,4 @@
-# $Id: Parser.pm 29 2006-05-31 11:10:14Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/Parser.pm 1110 2006-05-31T11:10:14.016366Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

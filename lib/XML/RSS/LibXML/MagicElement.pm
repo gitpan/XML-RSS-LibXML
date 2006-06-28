@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 25 2006-03-04 23:24:56Z daisuke $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/MagicElement.pm 1106 2006-03-04T23:24:56.125221Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.

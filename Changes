@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.22 - 28 Jun 2006
+  - Remove stray files and debug statements (rt #19939)
+
 0.21 - 31 May 2006
   - Repository blunder messes up the distro. fixed.
     Reported by Tatsuhiko Miyagawa
