@@ -1,4 +1,4 @@
-# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/V20.pm 1109 2006-03-06T02:59:00.668961Z daisuke  $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/V20.pm 1618 2006-07-05T08:12:56.867041Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -83,15 +83,27 @@ sub format
         # for enclosure, source, and guid
 
         if (exists $item->{enclosure}) {
-            my $e = $item->{enclosure};
-            $node = $xml->createElement('enclosure');
-            if (eval { $e->isa('XML::RSS::LibXML::MagicElement') }) {
-                $self->_populate_node($node, $inode, $e);
-            } else {
-                while (my($key, $value) = each %$e) {
-                    $node->setAttribute($key, $value);
+            my $enclosures;
+
+            # Handle multiple enclosures properly
+            if (ref ($item->{enclosure}) eq 'ARRAY') {
+                $enclosures = $item->{enclosure};
+            }
+            else {
+                $enclosures = [$item->{enclosure}];
+            }
+
+            foreach my $e (@$enclosures)
+            {
+                $node = $xml->createElement('enclosure');
+                if (eval { $e->isa('XML::RSS::LibXML::MagicElement') }) {
+                    $self->_populate_node($node, $inode, $e);
+                } else {
+                    while (my($key, $value) = each %$e) {
+                        $node->setAttribute($key, $value);
+                    }
+                    $inode->appendChild($node);
                 }
-                $inode->appendChild($node);
             }
         }
 

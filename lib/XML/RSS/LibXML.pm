@@ -1,4 +1,4 @@
-# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML.pm 1110 2006-05-31T11:10:14.016366Z daisuke  $
+# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML.pm 1619 2006-07-05T08:25:17.601612Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -6,7 +6,7 @@
 package XML::RSS::LibXML;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.22';
+$VERSION = '0.23';
 use Encode ();
 use XML::LibXML;
 use XML::LibXML::XPathContext;

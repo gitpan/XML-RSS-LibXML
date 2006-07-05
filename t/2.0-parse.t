@@ -1,10 +1,10 @@
-# $Id: /mirror/XML-RSS-LibXML/t/2.0-parse.t 1106 2006-03-04T23:24:56.125221Z daisuke  $
+# $Id: /mirror/XML-RSS-LibXML/t/2.0-parse.t 1619 2006-07-05T08:25:17.601612Z daisuke  $
 #
 # Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 use strict;
-use Test::More (tests => 37);
+use Test::More (tests => 51);
 use File::Temp qw(tempfile unlink0);
 BEGIN { use_ok("XML::RSS::LibXML") }
 
@@ -44,10 +44,16 @@ sub analyze_rss
       }
     }
     
-    my $enclosure = $xml->{items}->[1]->{enclosure};
-    is($enclosure->{url},'http://example.com/podcast/20020901.mp3', 'enclosure url ok');
-    is($enclosure->{type},'audio/mpeg', 'enclosure type ok');
-    is($enclosure->{length}, '4096', 'enclosure length ok');
+    my $enclosures = $xml->{items}->[1]->{enclosure};
+
+    is(ref($enclosures), 'ARRAY');
+
+    foreach my $enclosure (@$enclosures) {
+        like($enclosure->{url},
+            qr{http://example\.com/podcast/2002090(1|3|4)\.mp3}, 'enclosure url ok');
+        is($enclosure->{type},'audio/mpeg', 'enclosure type ok');
+        is($enclosure->{length}, '4096', 'enclosure length ok');
+    }
     
     my $xml2 = XML::RSS::LibXML->new();
     $xml2->parse($xml->as_string);
