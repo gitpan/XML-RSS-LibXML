@@ -1,11 +1,9 @@
-# $Id: /mirror/XML-RSS-LibXML/t/0.9-parse.t 1098 2005-08-17T05:05:21.368172Z daisuke  $
-#
-# Daisuke Maki <dmaki@cpan.org>
-# All rights reserved.
+use strict;
 
 use strict;
-use Test::More (tests => 9);
-BEGIN { use_ok("XML::RSS::LibXML") }
+use Test::More;
+
+plan tests => 7;
 
 use constant RSS_VERSION       => "0.9";
 use constant RSS_CHANNEL_TITLE => "Example 0.9 Channel";
@@ -34,30 +32,74 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0"?>
   </item>
 </rdf:RDF>);
 
+use_ok("XML::RSS::LibXML");
+
 my $xml = XML::RSS::LibXML->new();
 isa_ok($xml,"XML::RSS::LibXML");
 
 eval { $xml->parse(RSS_DOCUMENT); };
 is($@,'',"Parsed RSS feed");
 
-is($xml->{'_internal'}->{'version'},
+cmp_ok($xml->{'_internal'}->{'version'},
+       "eq",
        RSS_VERSION,
        "Is RSS version ".RSS_VERSION);
 
-is($xml->{channel}->{'title'},
+cmp_ok($xml->{channel}->{'title'},
+       "eq",
        RSS_CHANNEL_TITLE,
        "Feed title is ".RSS_CHANNEL_TITLE);
 
-is(ref($xml->{items}),
+cmp_ok(ref($xml->{items}),
+       "eq",
        "ARRAY",
        "\$xml->{items} is an ARRAY ref");
 
+my $ok = 1;
+
 foreach my $item (@{$xml->{items}}) {
-    foreach my $el qw(title) {
-        ok($item->{$el}, "$el exists for item $item->{link}");
+
+  foreach my $el ("title","link") {
+    if (! exists $item->{$el}) {
+      $ok = 0;
+      last;
     }
+  }
+
+  last if (! $ok);
 }
 
-my $xml2 = XML::RSS::LibXML->new;
-$xml2->parse($xml->as_string);
-is_deeply($xml, $xml2, "Reparse produces same structure");
+ok($ok,"All items have title and link elements");
+
+__END__
+
+=head1 NAME
+
+0.9-parse.t - tests for parsing RSS 0.90 data with XML::RSS::LibXML.pm
+
+=head1 SYNOPSIS
+
+ use Test::Harness qw (runtests);
+ runtests (./XML-RSS/t/*.t);
+
+=head1 DESCRIPTION
+
+Tests for parsing RSS 0.90 data with XML::RSS::LibXML.pm
+
+=head1 VERSION
+
+$Revision: 1.2 $
+
+=head1 DATE
+
+$Date: 2002/11/20 00:01:44 $
+
+=head1 AUTHOR
+
+Aaron Straup Cope
+
+=head1 SEE ALSO
+
+http://www.purplepages.ie/RSS/netscape/rss0.90.html
+
+=cut

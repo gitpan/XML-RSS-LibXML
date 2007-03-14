@@ -1,62 +1,73 @@
-# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML.pm 1619 2006-07-05T08:25:17.601612Z daisuke  $
+# $Id: LibXML.pm 33 2007-03-14 03:06:58Z daisuke $
 #
-# Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
+# Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
 
 package XML::RSS::LibXML;
 use strict;
-use vars qw($VERSION);
-$VERSION = '0.23';
-use Encode ();
+use warnings;
+use base qw(Class::Accessor::Fast);
+use Carp;
+use UNIVERSAL::require;
 use XML::LibXML;
 use XML::LibXML::XPathContext;
-use XML::RSS::LibXML::MagicElement;
+use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-my $LoadedParser = 0;
-my $LoadedGenerator = 0;
-my %namespaces = (
-    rdf     => "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-    dc      => "http://purl.org/dc/elements/1.1/",
-    syn     => "http://purl.org/rss/1.0/modules/syndication/",
-    admin   => "http://webns.net/mvcb/",
-    content => "http://purl.org/rss/1.0/modules/content/",
-    cc      => "http://web.resource.org/cc/",
-    taxo    => "http://purl.org/rss/1.0/modules/taxonomy/",
-    rss20   => "http://backend.userland.com/rss2", # really a dummy
-    rss10   => "http://purl.org/rss/1.0/",
-    rss09   => "http://my.netscape.com/rdf/simple/0.9/",
-);
+our $VERSION = '0.30';
+
+__PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
 sub new
 {
     my $class = shift;
     my %args  = @_;
 
+    my $impl  = $class->create_impl($args{version});
     my $self = bless {
-        _namespaces => {}
+        impl       => $impl,
+        version    => $args{version},
+        encoding   => $args{encoding} || 'UTF-8',
+        strict     => exists $args{strict} ? $args{strict} : 0,
+        namespaces => {},
+        modules    => {},
+        _internal  => {},
+        stylesheets => $args{stylesheet} ? (ref ($args{stylesheet}) eq 'ARRAY' ? $args{stylesheet} : [ $args{stylesheet} ]) : [],
+        num_items   => 0,
     }, $class;
 
-    if ($args{version}) {
-        $self->{output} = $args{version};
-        $self->{version} = $args{version};
-    }
-
-    if ($args{encoding}) {
-        $self->{encoding} = $args{encoding};
-    }
-
-    $self->_init();
+    $self->impl->reset($self);
     return $self;
 }
 
-sub _init
+{
+    # Proxy methods
+    foreach my $method qw(reset channel image add_item textinput skipDays skipHours) {
+        no strict 'refs';
+        *{$method} = sub { my $self = shift; $self->impl->$method($self, @_) };
+    }
+}
+
+sub internal
 {
     my $self = shift;
+    my $name = shift;
 
-    # Register namespaces.
-    while (my($prefix, $uri) = each %namespaces) {
-        $self->add_module(prefix => $prefix, uri => $uri);
+    my $value = $self->{_internal}{$name};
+    if (@_) {
+        $self->{_internal}{$name} = $_[0];
     }
+    return $value;
+}
+
+sub version
+{
+    my $self = shift;
+    my $version = $self->{version};
+    if (@_) {
+        $self->{version} = $_[0];
+        $self->internal('version', $_[0]);
+    }
+    return $version;
 }
 
 sub add_module
@@ -64,159 +75,176 @@ sub add_module
     my $self = shift;
     my %args = @_;
 
-    $self->{_namespaces}->{$args{prefix}} = $args{uri};
-}
-
-sub _create_parser
-{
-    my $self = shift;
-
-    if (!$LoadedParser) {
-        require XML::RSS::LibXML::Parser;
-        $LoadedParser++;
+    if ($args{prefix} eq '#default') {
+        # no op
+    } else {
+        $args{prefix} =~ /^[a-z_][a-zA-Z0-9.\-_]*$/
+            or croak "a namespace prefix should look like [a-z_][a-z0-9.\\-_]*";
     }
 
-    if (! $self->{_parser}) {
-        $self->{_parser} = XML::RSS::LibXML::Parser->new;
-    }
+    $args{uri}
+        or croak "a URI must be provided in a namespace declaration";
 
-    return $self->{_parser};
-}
-
-sub parse
-{
-    my $self = shift;
-    my $p = $self->_create_parser();
-    $p->parse($self, @_);
-    return $self;
-}
-
-sub parsefile
-{
-    my $self = shift;
-    my $p = $self->_create_parser();
-    $p->parsefile($self, @_);
-    return $self;
-}
-
-sub save
-{
-    my $self = shift;
-    my $file = shift;
-
-    open(OUT, ">$file") or Carp::croak("Cannot open file $file for write: $!");
-    print OUT $self->as_string;
-    close(OUT);
-}
-
-sub _elem { $_[0]->{$_[1]} }
-
-sub _create_generator
-{
-    my $self = shift;
-
-    if (!$LoadedGenerator) {
-        require XML::RSS::LibXML::Generator;
-        $LoadedGenerator++;
-    }
-
-    if (! $self->{_generator}) {
-        $self->{_generator} = XML::RSS::LibXML::Generator->new;
-    }
-    return $self->{_generator};
-}
-
-sub _encode
-{
-    my $self = shift;
-    my $value = shift;
-    return ($self->{encoding}) ?
-        Encode::encode($self->{encoding} || 'UTF-8', $value) :
-        $value;
-}
-
-sub channel
-{
-    my $self = shift;
-    if (@_ == 1) { # retrieve
-        my $value = $self->_elem('channel')->{$_[0]};
-        return $value;
-    } elsif (@_) {
-        my $g = $self->_create_generator();
-        $g->channel($self, @_);
-    }
-    return $self->_elem('channel');
-}
-
-sub image
-{
-    my $self = shift;
-    if (@_ == 1) { # retrieve
-        my $value = $self->_elem('image')->{$_[0]};
-        return $value;
-    } elsif (@_) {
-        my $g = $self->_create_generator();
-        $g->image($self, @_);
-    }
-    return $self->_elem('image');
-}
-
-sub textinput
-{
-    my $self = shift;
-    if (@_ == 1) { # retrieve
-        my $value = $self->_elem('textinput')->{$_[0]};
-        return $value;
-    } elsif (@_) {
-        my $g = $self->_create_generator();
-        $g->textinput($self, @_);
-    }
-    return $self->_elem('textinput');
-}
-
-sub add_item
-{
-    my $self = shift;
-
-    if (@_) {
-        my $g = $self->_create_generator();
-        $g->add_item($self, @_);
-    }
+    $self->namespaces->{$args{prefix}} = $args{uri};
+    $self->modules->{$args{uri}} = $args{prefix};
 }
 
 sub items
 {
-    my $items = shift->_elem('items');
+    my $self = shift;
+    my $items = $self->{items};
     $items ?
         (wantarray ? @$items : $items) :
         (wantarray ? ()      : undef);
 }
 
-my %VersionFormatter = (
-    '0.9' => 'XML::RSS::LibXML::V09',
-    '1.0' => 'XML::RSS::LibXML::V10',
-    '2.0' => 'XML::RSS::LibXML::V20'
-);
-my %LoadedFormatter;
+sub create_impl
+{
+    my $self = shift;
+    my $version = shift;
+    if ($version) {
+        $version =~ s/\./_/g;
+        $version = "V$version";
+    } else {
+        $version = "Null";
+    }
+
+    my $pkg = "XML::RSS::LibXML::$version";
+    $pkg->require or die;
+    return $pkg->new;
+}
+
+sub create_libxml
+{
+    my $self = shift;
+    my $p    = XML::LibXML->new;
+    $p->recover(1);
+    return $p;
+}
+
+sub parse
+{
+    my $self = shift;
+    $self->reset();
+    my $p    = $self->create_libxml;
+    my $dom  = $p->parse_string($_[0]);
+    $self->parse_dom($dom);
+    $self;
+}
+
+sub parsefile
+{
+    my $self = shift;
+    $self->reset();
+    my $p    = $self->create_libxml;
+    my $dom  = $p->parse_file($_[0]);
+    $self->parse_dom($dom);
+    $self;
+}
+
+sub parse_dom
+{
+    my $self = shift;
+    my $dom  = shift;
+    my $version = $self->guess_version_from_dom($dom);
+    my $impl = $self->create_impl($version);
+    $self->impl($impl);
+    $self->impl->parse_dom($self, $dom);
+    $self;
+}
+
+sub get_namespaces
+{
+    my $self = shift;
+    my $node = shift;
+    my %h = map {
+        (($_->getName() || '#default') => $_->getData)
+    } $node->getNamespaces();
+
+#    while (my($p, $uri) = each %h) {
+#        my $prefix = XML::RSS::LibXML::Namespaces::lookup_prefix($uri);
+#        if ($prefix) {
+#            $h{$prefix} = $uri;
+#        }
+#    }
+    return wantarray ? %h : \%h;
+}
+
+sub create_xpath_context
+{
+    my $self = shift;
+    my $namespaces = shift || {};
+    my $xc = XML::LibXML::XPathContext->new;
+    while ( my ($prefix, $namespace) = each %{ $namespaces } ) {
+        $xc->registerNs($prefix, $namespace);
+    }
+    return $xc;
+}
+
+sub guess_version_from_dom
+{
+    my $self = shift;
+    my $dom = shift;
+    my $root = $dom->documentElement();
+    my $namespaces = $self->get_namespaces($root);
+    # Check if we have non-default RSS namespace 
+    my $rss10_prefix = 'rss10';
+    while (my($prefix, $uri) = each %$namespaces) {
+        if ($uri eq NS_RSS10) {
+            $rss10_prefix = $prefix;
+            last;
+        }
+    }
+    if ($rss10_prefix && $rss10_prefix eq '#default') {
+        $rss10_prefix = 'rss10';
+        $namespaces->{$rss10_prefix} = NS_RSS10;
+        $root->setNamespace(NS_RSS10, $rss10_prefix, 0);
+    }
+
+    my $xc  = $self->create_xpath_context(
+        # use the minimum required to guess
+        $namespaces
+    );
+
+    my $version = 'UNKNOWN';
+
+    # Test starting from the most likely candidate
+    if (eval { $xc->findnodes('/rdf:RDF', $dom) }) {
+        # 1.0 or 0.9.
+
+        # Wrap up in evail, because we may not have registered rss10
+        # namespace prefix
+        if (eval { $xc->findnodes("/rdf:RDF/$rss10_prefix:channel", $dom) }) {
+            $version = '1.0';
+        } else {
+            $version = '0.9';
+        }
+    } elsif (eval { $xc->findnodes('/rss', $dom) }) {
+        # 0.91 or 2.0 -ish
+        $version = $xc->findvalue('/rss/@version', $dom);
+    } else {
+        die "Failed to guess version";
+    }
+    return $version;
+}
+
 sub as_string
 {
     my $self = shift;
-    my $format = @_ ? shift : 1;
+    my $format = @_ ? $_[0] : 1;
+    my $impl = $self->create_impl($self->output || $self->version);
+    $self->impl($impl);
+    $self->impl->as_string($self, $format);
+}
 
-    my $version = $self->{output} || $self->{version} || '1.0';
-    my $fmt_class = $VersionFormatter{$version};
-
-    die "No formatter found for RSS version $version" if ! $fmt_class;
-
-    if (! $LoadedFormatter{$fmt_class}) {
-        eval "require $fmt_class"; die if $@;
-        $LoadedFormatter{$fmt_class}++;
-    }
+sub save
+{   
+    my $self = shift;
+    my $file = shift;
     
-    my $fmt = $fmt_class->new;
-
-    $self->{encoding} ||= 'UTF-8';
-    $fmt->format($self, $format);
+    open(OUT, ">$file") or Carp::croak("Cannot open file $file for write: $!");
+    print OUT $self->as_string;
+    close(OUT);
 }
 
 1;
@@ -250,6 +278,17 @@ XML::RSS::LibXML - XML::RSS with XML::LibXML
 
   $rss->as_string($format);
 
+  # XML::RSS::LibXML only methods
+
+  my $version     = $rss->version;
+  my $hash        = $rss->namespaces;
+  my $list        = $rss->items;
+  my $encoding    = $rss->encoding;
+  my $modules     = $rss->modules;
+  my $output      = $rss->output;
+  my $stylesheets = $rss->stylesheets;
+  my $num_items   = $rss->num_items;
+
 =head1 DESCRIPTION
 
 XML::RSS::LibXML uses XML::LibXML (libxml2) for parsing RSS instead of XML::RSS'
@@ -263,6 +302,17 @@ such that it adheres to the XML::RSS interface.
 
 Use this module when you have severe performance requirements working with
 RSS files.
+
+=head1 VERSION 0.30
+
+The original XML::RSS has been evolving in fairly rapid manner lately,
+and that meant that there were a lot of features to keep up with.
+To keep compatibility, I've had to pretty much rewrite the module from
+ground up.
+
+For the first few iterations, I plan on releasing XML::RSS::LibXML while
+it's in alpha stage. You probably don't want to install this in your
+production environment while this disclaimer appears in the docs
 
 =head1 COMPATIBILITY
 
@@ -383,12 +433,15 @@ In scalar context, returns the reference to the list of items.
 
 =head1 PERFORMANCE
 
-Here's a simple benchmark using benchmark.pl in this distribution:
+Here's a simple benchmark using benchmark.pl in this distribution,
+using XML::RSS 1.29_02 and XML::RSS::LibXML 0.30
 
-  daisuke@localhost XML-RSS-LibXML$ perl -Mlib=lib benchmark.pl index.rdf 
+  daisuke@beefcake XML-RSS-LibXML$ perl -Mblib tools/benchmark.pl t/data/rss20.xml 
+  XML::RSS -> 1.29_02
+  XML::RSS::LibXML -> 0.30
                Rate        rss rss_libxml
-  rss        4.40/s         --       -86%
-  rss_libxml 32.2/s       633%         --
+  rss        25.6/s         --       -67%
+  rss_libxml 78.1/s       205%         --
 
 =head1 CAVEATS
 
@@ -441,10 +494,17 @@ to have tests that do more extensive testing for correctness
 
 L<XML::RSS|XML::RSS>, L<XML::LibXML|XML::LibXML>, L<XML::LibXML::XPathContext>
 
-=head1 AUTHORS
+=head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.
+Copyright (c) 2005-2007 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.
+
+Many tests were shamelessly borrowed from XML::RSS 1.29_02
 
 Development partially funded by Brazil, Ltd. E<lt>http://b.razil.jpE<gt>
 
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
 =cut
+
+
+

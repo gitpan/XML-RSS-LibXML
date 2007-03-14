@@ -1,38 +1,23 @@
----
-name: XML-RSS-LibXML
-version: 0.23
-author:
-  - 'Copyright (c) 2005 Daisuke Maki E<lt>dmaki@cpan.orgE<gt>, Tatsuhiko Miyagawa E<lt>miyagawa@bulknews.netE<gt>. All rights reserved.'
+--- 
 abstract: XML::RSS with XML::LibXML
+author: -2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved.
+distribution_type: module
+generated_by: Module::Install version 0.65
 license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-requires:
-  Encode: 0
+meta-spec: 
+  url: http://module-build.sourceforge.net/META-spec-v1.3.html
+  version: 1.3
+name: XML-RSS-LibXML
+no_index: 
+  directory: 
+    - inc
+    - t
+requires: 
+  Class::Accessor::Fast: 0
+  DateTime::Format::Mail: 0
+  DateTime::Format::W3CDTF: 0
+  UNIVERSAL::require: 0
   XML::LibXML: 0
   XML::LibXML::XPathContext: 0
-build_requires:
-  Test::More: 0
-provides:
-  XML::RSS::LibXML:
-    file: lib/XML/RSS/LibXML.pm
-    version: 0.23
-  XML::RSS::LibXML::Format:
-    file: lib/XML/RSS/LibXML/Format.pm
-  XML::RSS::LibXML::Generator:
-    file: lib/XML/RSS/LibXML/Generator.pm
-  XML::RSS::LibXML::MagicElement:
-    file: lib/XML/RSS/LibXML/MagicElement.pm
-    version: 0.02
-  XML::RSS::LibXML::Parser:
-    file: lib/XML/RSS/LibXML/Parser.pm
-  XML::RSS::LibXML::V09:
-    file: lib/XML/RSS/LibXML/V09.pm
-  XML::RSS::LibXML::V10:
-    file: lib/XML/RSS/LibXML/V10.pm
-  XML::RSS::LibXML::V20:
-    file: lib/XML/RSS/LibXML/V20.pm
-generated_by: Module::Build version 0.2801
-meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+tests: t/*.t t/*/*.t
+version: 0.30

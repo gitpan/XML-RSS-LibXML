@@ -13,5 +13,6 @@ eval {
 EORSS
 };
 ok(!$@, "parse check. $@");
-is($rss->{channel}{admin}{generatorAgent}, '');
+
+is($rss->{channel}{admin}{generatorAgent}{_content}, '');
 is($rss->{channel}{admin}{generatorAgent}{admin}, 'http://webns.net/mvcb/');

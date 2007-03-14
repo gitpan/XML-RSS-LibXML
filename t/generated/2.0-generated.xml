@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:my="http://purl.org/my/rss/module/" version="2.0">
+  <channel>
+    <ttl>60</ttl>
+    <copyright>Copyright 2002</copyright>
+    <generator>XML::RSS::LibXML Test</generator>
+    <category>MyCategory</category>
+    <webMaster>webmaster\@example.com</webMaster>
+    <docs>http://backend.userland.com/rss</docs>
+    <link>http://example.com/</link>
+    <language>en-us</language>
+    <description/>
+    <image/>
+    <lastBuildDate>2007-03-14T02:50:17+0900</lastBuildDate>
+    <title>Test 2.0 Feed</title>
+    <pubDate>2007-03-14T02:50:17+0900</pubDate>
+    <managingEditor>editor\@example.com</managingEditor>
+    <item>
+      <author>joeuser@example.com</author>
+      <comments>http://example.com/2007/03/14/comments.html</comments>
+      <category>MyCategory</category>
+      <link>http://example.com/2007/03/14</link>
+      <enclosure>HASH(0x19b5440)</enclosure>
+      <description>Yadda yadda yadda - R&amp;D;</description>
+      <title>This is an item</title>
+      <pubDate>Wed Mar 14 02:50:17 2007 GMT</pubDate>
+    </item>
+  </channel>
+  <image>
+    <url>http://example.com/example.gif</url>
+    <link>http://example.com/</link>
+    <height>25</height>
+    <description>Test Image</description>
+    <title>Test Image</title>
+  </image>
+  <textInput>
+    <link>http://example.com/search.pl</link>
+    <name>q</name>
+    <description>Search for an example</description>
+    <title>Search</title>
+  </textInput>
+</rss>

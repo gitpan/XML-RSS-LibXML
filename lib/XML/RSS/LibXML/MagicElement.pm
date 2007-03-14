@@ -1,4 +1,4 @@
-# $Id: /mirror/XML-RSS-LibXML/lib/XML/RSS/LibXML/MagicElement.pm 1106 2006-03-04T23:24:56.125221Z daisuke  $
+# $Id: MagicElement.pm 33 2007-03-14 03:06:58Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -22,7 +22,12 @@ sub new
     my @attrs;
     my $attrs = $args{attributes};
     if (ref($attrs) eq 'ARRAY') {
-        %attrs = map { ($_->localname, $_->getData) } @$attrs;
+        %attrs = map { (
+            $_->prefix && $_->prefix ne 'xmlns' ?
+                sprintf('%s:%s', $_->prefix, $_->localname) :
+                $_->localname
+            , $_->getData
+        ) } @$attrs;
         @attrs = map { $_->getName } @$attrs;
     } elsif (ref($attrs) eq 'HASH') {
         %attrs = %$attrs;
@@ -47,7 +52,7 @@ sub attributes
 sub toString
 {
     my $self = shift;
-    return $self->{_content};
+    return $self->{_content} || join('', map {$self->{$_} } $self->attributes);
 }
 
 1;
@@ -102,7 +107,10 @@ Returns the list of attributes associated with this element
 
 =head2 toString
 
-Returns the string representation of this object
+Returns the string representation of this object. 
+By default we use the "text content" of the found tag, but for XML::RSS 
+compatibility, we use the concatenation of the attributes if no content is
+found.
 
 =head1 AUTHOR
 

@@ -3,6 +3,11 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.30_01 14 Mar 2007
+  - BEWARE! MAJOR CHANGE IN CODE!
+  - Compatiblity with XML::RSS-1.29_02's test suite.
+  - Completely redo the internal structure in a saner manner.
+
 0.23 - 05 Jul 2006
   - Apply multiple enclosure patch from SERGEYCHE (rt #20285)
     This allows you to *generate* RSS with multiple enclosures

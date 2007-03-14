@@ -4,11 +4,14 @@ use Benchmark qw(cmpthese);
 use XML::RSS;
 use XML::RSS::LibXML;
 
+print "XML::RSS -> $XML::RSS::VERSION\n";
+print "XML::RSS::LibXML -> $XML::RSS::LibXML::VERSION\n";
+
 my @files = @ARGV;
 my $i_rl = 0;
 my $i_r = 0;
 
-cmpthese(10_000, {
+cmpthese(100, {
     rss_libxml => \&rss_libxml,
     rss        => \&rss
 });

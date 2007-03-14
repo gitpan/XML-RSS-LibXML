@@ -1,11 +1,5 @@
-# $Id: /mirror/XML-RSS-LibXML/t/1.0-parse.t 1103 2005-11-18T07:33:44.704855Z daisuke  $
-#
-# Daisuke Maki <dmaki@cpan.org>
-# All rights reserved.
-
 use strict;
-use Test::More (tests => 21);
-BEGIN { use_ok("XML::RSS::LibXML") }
+use Test::More;
 
 use constant RSS_VERSION       => "1.0";
 use constant RSS_CHANNEL_TITLE => "Example 1.0 Channel";
@@ -19,8 +13,6 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0" encoding="UTF-8"?>
  xmlns:dc="http://purl.org/dc/elements/1.1/"
  xmlns:taxo="http://purl.org/rss/1.0/modules/taxonomy/"
  xmlns:syn="http://purl.org/rss/1.0/modules/syndication/"
- xmlns:content="http://purl.org/rss/1.0/modules/content/"
- xmlns:example="http://example.org/ns#"
 >
 
 <channel rdf:about="http://rc3.org/">
@@ -46,63 +38,86 @@ use constant RSS_DOCUMENT      => qq(<?xml version="1.0" encoding="UTF-8"?>
  <title>News for September the First</title>
  <link>http://example.com/2002/09/01</link>
  <description>something happened today</description>
- <content:encoded><![CDATA[TEST]]></content:encoded>
- <dc:date>2005-08-23T07:00+00:00</dc:date>
- <example:foo>bar</example:foo>
 </item>
 
 </rdf:RDF>
 );
 
+plan tests => 8;
 
+use_ok("XML::RSS::LibXML");
 
 my $xml = XML::RSS::LibXML->new();
 isa_ok($xml,"XML::RSS::LibXML");
 
-$xml->add_module(prefix => "example", uri => "http://example.org/ns#");
-
 eval { $xml->parse(RSS_DOCUMENT); };
 is($@,'',"Parsed RSS feed");
 
-is($xml->{'_internal'}->{'version'},
+cmp_ok($xml->{'_internal'}->{'version'},
+       "eq",
        RSS_VERSION,
        "Is RSS version ".RSS_VERSION);
 
-is($xml->{channel}->{'title'},
+cmp_ok($xml->{namespaces}->{'#default'},
+       "eq",
+       RSS_DEFAULTNS,
+       RSS_DEFAULTNS);
+
+cmp_ok($xml->{channel}->{'title'},
+       "eq",
        RSS_CHANNEL_TITLE,
        "Feed title is ".RSS_CHANNEL_TITLE);
 
-is($xml->channel->{'title'},
-       RSS_CHANNEL_TITLE,
-       "Feed title is ".RSS_CHANNEL_TITLE);
-is($xml->channel('title'), $xml->channel->{title},
-    "Feed title accessor returns the same");
-
-is(ref($xml->{items}),
+cmp_ok(ref($xml->{items}),
+       "eq",
        "ARRAY",
        "\$xml->{items} is an ARRAY ref");
 
+my $ok = 1;
+
 foreach my $item (@{$xml->{items}}) {
-    foreach my $el ("title","link","description") {
-        ok($item->{$el}, "$el exists for item $item->{link}");
+
+  foreach my $el ("title","link","description") {
+    if (! exists $item->{$el}) {
+      $ok = 0;
+      last;
     }
+  }
+
+  last if (! $ok);
 }
 
-is $xml->{items}->[1]->{dc}->{date}, "2005-08-23T07:00+00:00";
-is $xml->{items}->[1]->{content}->{encoded}, 'TEST';
-is $xml->{items}->[1]->{example}->{foo}, "bar";
+ok($ok,"All items have title,link and description elements");
 
-is $xml->{items}->[1]->{'http://purl.org/dc/elements/1.1/'}->{date}, "2005-08-23T07:00+00:00";
-is $xml->{items}->[1]->{'http://purl.org/rss/1.0/modules/content/'}->{encoded}, 'TEST';
-is $xml->{items}->[1]->{'http://example.org/ns#'}->{foo}, "bar";
+__END__
 
-my $xml2 = XML::RSS::LibXML->new;
-$xml2->add_module(prefix => "example", uri => "http://example.org/ns#");
-$xml2->parse($xml->as_string());
+=head1 NAME
 
-foreach my $p (grep { /^_/ } keys %{$xml}) {
-    delete $xml->{$p};
-    delete $xml2->{$p};
-}
+1.0-parse.t - tests for parsing RSS 1.0 data with XML::RSS::LibXML.pm
 
-is_deeply($xml, $xml2, "Reparse produces same structure");
+=head1 SYNOPSIS
+
+ use Test::Harness qw (runtests);
+ runtests (./XML-RSS/t/*.t);
+
+=head1 DESCRIPTION
+
+Tests for parsing RSS 1.0 data with XML::RSS::LibXML.pm
+
+=head1 VERSION
+
+$Revision: 1.2 $
+
+=head1 DATE
+
+$Date: 2002/11/19 23:57:20 $
+
+=head1 AUTHOR
+
+Aaron Straup Cope
+
+=head1 SEE ALSO
+
+http://web.resource.org/rss/1.0
+
+=cut

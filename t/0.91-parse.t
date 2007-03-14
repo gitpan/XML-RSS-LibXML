@@ -1,10 +1,3 @@
-# $Id$
-#
-# Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
-# All rights reserved.
-
-# XXX - straight copy from XML-RSS-1.05. May need to tweak for X::R::LibXML
-
 use strict;
 use Test::More;
 
@@ -70,3 +63,38 @@ foreach my $item (@{$xml->{items}}) {
 }
 
 ok($ok,"All items have title,link and description elements");
+
+__END__
+
+=head1 NAME
+
+0.91-parse.t - tests for parsing RSS 0.91 data with XML::RSS::LibXML.pm
+
+=head1 SYNOPSIS
+
+ use Test::Harness qw (runtests);
+ runtests (./XML-RSS/t/*.t);
+
+=head1 DESCRIPTION
+
+Tests for parsing RSS 0.91 data with XML::RSS::LibXML.pm
+
+=head1 VERSION
+
+$Revision: 1.2 $
+
+=head1 DATE
+
+$Date: 2002/11/19 23:58:03 $
+
+=head1 AUTHOR
+
+Aaron Straup Cope
+
+=head1 SEE ALSO
+
+http://my.netscape.com/publish/formats/rss-spec-0.91.html
+
+http://backend.userland.com/rss091
+
+=cut

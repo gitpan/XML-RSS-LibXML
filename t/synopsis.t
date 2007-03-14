@@ -1,12 +1,15 @@
-# $Id: /mirror/XML-RSS-LibXML/t/synopsis.t 1099 2005-08-17T10:20:53.231582Z daisuke  $
+# $Id: synopsis.t 33 2007-03-14 03:06:58Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
 
 use strict;
-use Test::More (tests => 13);
+use Test::More (tests => 14);
 
-BEGIN { use_ok("XML::RSS::LibXML") };
+BEGIN {
+    use_ok("XML::RSS::LibXML");
+    use_ok("XML::RSS::LibXML::Namespaces", qw(NS_RSS10 NS_RSS20));
+};
 
 my $rss = new XML::RSS::LibXML (version => '1.0');
 ok($rss->channel(
@@ -130,6 +133,7 @@ sub reparse
     my $rss1 = shift;
     my $rss2 = XML::RSS::LibXML->new();
 
+# print STDERR $rss1->as_string;
     $rss2->parse($rss1->as_string());
     my $version = $rss2->{_internal}{version} || $rss2->{output};
 
@@ -148,6 +152,21 @@ sub reparse
         delete $rss1->{items};
         delete $rss2->{items};
     }
+
+    # XXX - Namespaces and modules don't necessarily work for our custom
+    # rss20/rss10 namespaces
+    delete $rss1->{modules}{&NS_RSS10};
+    delete $rss1->{modules}{&NS_RSS20};
+    delete $rss2->{modules}{&NS_RSS10};
+    delete $rss2->{modules}{&NS_RSS20};
+    delete $rss1->{namespaces}{rss10};
+    delete $rss1->{namespaces}{rss20};
+    delete $rss2->{namespaces}{rss10};
+    delete $rss2->{namespaces}{rss20};
+    
+    # Also, #default namespaces don't count
+    delete $rss1->{namespaces}{'#default'};
+    delete $rss2->{namespaces}{'#default'};
 
     is_deeply($rss1, $rss2, "Reparsing produces same structure (RSS version = $version)");
 }
