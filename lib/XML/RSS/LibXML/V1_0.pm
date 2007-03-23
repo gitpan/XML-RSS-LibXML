@@ -1,4 +1,4 @@
-# $Id: V1_0.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: V1_0.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -30,6 +30,8 @@ sub definition
             name        => undef,
             link        => undef,
         }, 'XML::RSS::LibXML::ElementSpec'),
+        skipDays => bless ({ day => undef }, 'XML::RSS::LibXML::ElementSpec' ),
+        skipHours => bless ({ hour => undef }, 'XML::RSS::LibXML::ElementSpec' ),
     };
 }
 
@@ -151,8 +153,24 @@ my %DcElements = (
         ],
         callback => $format_dates
     },
+    'dc:language' => [
+        { module => 'dc', element => 'language' },
+        'language'
+    ],
+    'dc:rights' => [
+        { module => 'dc', element => 'rights' },
+        'copyright'
+    ],
+    'dc:publisher' => [
+        { module => 'dc', element => 'publisher' },
+        'managingEditor'
+    ],
+    'dc:creator' => [
+        { module => 'dc', element => 'creator' },
+        'webMaster'
+    ],
     (map { ("dc:$_" => [ { module => 'dc', element => $_ } ]) }
-        qw(language rights publisher creator title subject description contributer type format identifier source relation coverage)),
+        qw(title subject description contributer type format identifier source relation coverage)),
 );
 
 my %SynElements = (
@@ -207,11 +225,11 @@ sub create_dom
     if (my $textinput = $c->textinput) {
         my $inode;
 
-        $inode = $dom->createElement('textInput');
+        $inode = $dom->createElement('textinput');
         $inode->setAttribute('rdf:resource', $textinput->{link}) if $textinput->{link};
         $channel->appendChild($inode);
 
-        $inode = $dom->createElement('textInput');
+        $inode = $dom->createElement('textinput');
         $inode->setAttribute('rdf:resource', $textinput->{link}) if $textinput->{link};
         $self->create_element_from_spec($textinput, $dom, $inode, \%TextInputElements);
         $self->create_extra_modules($textinput, $dom, $inode, $c->namespaces);

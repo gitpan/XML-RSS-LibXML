@@ -1,4 +1,4 @@
-# $Id: ImplBase.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: ImplBase.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -21,8 +21,19 @@ sub rss_accessor
         croak "Unregistered entity: Can't access $name field in object of class " . ref($self);
     }
 
+    my $ret;
+
+
     if (@_ == 1) {
-        return $c->{$name}->{$_[0]};
+        if (ref $_[0]) { #  eval { $_[0]->isa('XML::RSS::LibXML::MagicElement') }) {
+            $ret = $c->{$name};
+            $c->{$name} = $_[0];
+        } else {
+            $ret = $c->{$name}->{$_[0]};
+            if (ref $ret && eval { $ret->isa('XML::RSS::LibXML::ElementSpec') }) {
+                $ret = undef;
+            }
+        }
     } elsif (@_ > 1) {
         my %hash = @_;
         my $definition = $self->accessor_definition;
@@ -36,15 +47,22 @@ sub rss_accessor
                 }
             }
 
+#            $self->store_element($c, $c->{$name}, $key, $hash{$key});
             $self->set_value($c, $name, $key, $hash{$key});
             if (my $uri = $c->namespaces->{$key}) {
                 $self->set_value($c, $name, $uri, $hash{$key});
+#                $self->store_element($c, $c->{$name}, $uri, $hash{$key});
             }
         }
-        return $c->{$name};
+        $ret = $c->{$name};
     } else {
-        return $c->{$name};
+        $ret = $c->{$name};
+        if (ref $ret && eval { $ret->isa('XML::RSS::LibXML::ElementSpec') }) {
+            $ret = undef;
+        }
     }
+
+    return $ret;
 }
 
 sub definition {}
@@ -54,6 +72,9 @@ sub validate_accessor
 {
     my ($self, $definition, $prefix, $key, $value) = @_;
 
+    if (! defined $value) {
+        croak "Undefined value in XML::RSS::LibXML::validate_accessor";
+    }
     my $spec = $definition->{$prefix}{$key};
     croak "$key cannot exceed " . $spec->[1] . " characters in length"
         if defined $spec->[1] && length($value) > $spec->[1];
@@ -62,6 +83,10 @@ sub validate_accessor
 sub set_value
 {
     my ($self, $c, $prefix, $key, $value) = @_;
+
+    if (eval { $c->{$prefix}->isa('XML::RSS::LibXML::ElementSpec') }) {
+        $c->{$prefix} = +{ %{ $c->{$prefix} } };
+    }
     $c->{$prefix}{$key} = $value;
 }
 
@@ -173,7 +198,6 @@ sub parse_children
         # XXX - this is probably the only case where we need to explicitly
         # normalize a name
         $name = 'textinput' if ($name eq 'textInput');
-
         my $val    = undef;
         if ($child->findnodes('./*')) {
             $val = $self->parse_children($c, $child);
@@ -214,6 +238,7 @@ sub parse_children
 sub as_string
 {
     my ($self, $c, $format) = @_;
+
     my $dom = $self->create_dom($c);
     return $dom->toString($format);
 }
@@ -267,7 +292,7 @@ sub create_misc_simple
 
         my @nodes;
         while (my($e, $value) = each %$children) {
-            if ($value) {
+            if (defined $value) {
                 my $node = $dom->createElement($e);
                 $node->appendText($value);
                 push @nodes, $node;
@@ -308,7 +333,7 @@ sub create_extra_modules
 
     while (my ($prefix, $uri) = each %$namespaces) {
         next if $prefix =~ /^(?:dc|syn|taxo|rss\d\d)$/;
-        next if ! $c->{$prefix};
+        next if ! defined $c->{$prefix};
 
         while (my($e, $value) = each %{ $c->{$prefix} }) {
             my $node = $dom->createElement("$prefix:$e");
@@ -359,7 +384,6 @@ sub create_element_from_spec
                 $value = $c->{$p};
             }
 
-
             if (defined $value) {
                 if ($prefix) {
                     $root->setNamespace(
@@ -393,7 +417,8 @@ sub add_item
 
     $self->validate_item($c, $h);
 
-    if (my $guid = $h->{guid}) {
+    my $guid = $h->{guid};
+    if (defined $guid) {
         # guid should *only* be MagicElement
         if (! eval { $guid->isa('XML::RSS::LibXML::MagicElement') }) {
             $h->{permaLink} = $guid;
@@ -406,6 +431,11 @@ sub add_item
                 $h->{permaLink} = $guid->{_content};
             }
         }
+    } elsif (defined (my $permaLink = $h->{permaLink})) {
+        $h->{guid} = XML::RSS::LibXML::MagicElement->new(
+            content => $permaLink,
+            attributes => { isPermaLink => 'true' }
+        );
     }
 
     my $namespaces = $c->namespaces;

@@ -3,18 +3,18 @@
   <channel rdf:about="http://example.com/">
     <link>http://example.com/</link>
     <description>To lead by example</description>
-    <dc:date>2007-03-14T02:50:14+0900</dc:date>
+    <dc:date>2007-03-23T05:24:39+0900</dc:date>
     <title>Test 1.0 Feed</title>
     <items>
       <rdf:Seq>
-        <rdf:li rdf:resource="http://example.com/2007/03/14"/>
+        <rdf:li rdf:resource="http://example.com/2007/03/23"/>
       </rdf:Seq>
     </items>
     <image rdf:resource="http://example.com/example.gif"/>
-    <textInput rdf:resource="http://example.com/search.pl"/>
+    <textinput rdf:resource="http://example.com/search.pl"/>
   </channel>
-  <item rdf:about="http://example.com/2007/03/14">
-    <link>http://example.com/2007/03/14</link>
+  <item rdf:about="http://example.com/2007/03/23">
+    <link>http://example.com/2007/03/23</link>
     <description>Yadda &amp; yadda &amp; yadda</description>
     <dc:creator>joeuser@example.com</dc:creator>
     <title>This is an item</title>
@@ -24,10 +24,10 @@
     <link>http://example.com/</link>
     <title>Test Image</title>
   </image>
-  <textInput rdf:resource="http://example.com/search.pl">
+  <textinput rdf:resource="http://example.com/search.pl">
     <link>http://example.com/search.pl</link>
     <name>q</name>
     <description>Search for an example</description>
     <title>Search</title>
-  </textInput>
+  </textinput>
 </rdf:RDF>

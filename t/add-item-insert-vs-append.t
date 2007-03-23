@@ -5,8 +5,7 @@
 use strict;
 use warnings;
 
-use Test::More skip_all => "TODO";
-#tests => 3;
+use Test::More tests => 3;
 
 use XML::RSS::LibXML;
 
@@ -50,7 +49,7 @@ sub create_rss
 
     # TEST
     contains($rss,
-        qr{<title>GTKeyboard 0.85</title>.+<title>gcc 10.0.10</title>},
+        qr{(?sm)<title>GTKeyboard 0.85</title>.+<title>gcc 10.0.10</title>},
         "Checking for second item after first item when add_item without mode."
     );
 }
@@ -66,7 +65,7 @@ sub create_rss
 
     # TEST
     contains($rss,
-        qr{<title>GTKeyboard 0.85</title>.+<title>gcc 10.0.10</title>},
+        qr{(?sm)<title>GTKeyboard 0.85</title>.+<title>gcc 10.0.10</title>},
         "Checking for second item after first item when add_item with mode == append."
     );
 }
@@ -82,7 +81,7 @@ sub create_rss
 
     # TEST
     contains($rss,
-        qr{<title>gcc 10.0.10</title>.+<title>GTKeyboard 0.85</title>},
+        qr{(?sm)<title>gcc 10.0.10</title>.+<title>GTKeyboard 0.85</title>},
         "Checking for second item before first item when add_item with mode == insert."
     );
 }

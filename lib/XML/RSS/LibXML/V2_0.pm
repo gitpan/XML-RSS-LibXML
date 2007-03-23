@@ -1,4 +1,4 @@
-# $Id: V2_0.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: V2_0.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -50,13 +50,11 @@ my %ChannelElements = (
     category => [ { module => 'dc', element => 'category' }, 'category' ],
     generator => [ { module => 'dc', element => 'generator' }, 'generator' ],
     ttl => [ { module => 'dc', element => 'ttl' }, 'ttl' ],
-    image => [ 'image' ],
 ); 
 
 my %ItemElements = (
     %DcElements,
     enclosure => ['enclosure'],
-    guid      => ['guid'],
     map { ($_ => [$_]) }
         qw(title link description author category comments pubDate)
 );
@@ -117,6 +115,19 @@ sub definition
     };
 }
 
+sub add_item
+{
+    my $self = shift;
+    my $c    = shift;
+    my $h    = ref($_[0]) eq 'HASH' ? $_[0] : {@_};
+
+    if (! defined $h->{description} && ! defined $h->{title}) {
+        return;
+    }
+
+    $self->SUPER::add_item($c, $h);
+}
+
 sub parse_dom
 {
     my $self = shift;
@@ -140,13 +151,23 @@ sub parse_channel
     my ($root) = $xc->findnodes('/rss/channel', $dom);
     my %h = $self->parse_children($c, $root, './*[name() != "item"]');
 
+    foreach my $type qw(day hour) {
+        my $field = 'skip' . ucfirst($type) . 's';
+        if (my $skip = delete $h{$field}) {
+            if (! UNIVERSAL::isa($skip, 'XML::RSS::LibXML::ElementSpec')) {
+                $c->$field(UNIVERSAL::isa($skip, 'XML::RSS::LibXML::MagicElement') ? $skip : %$skip);
+            }
+        }
+    }
+
+    foreach my $field qw(textinput image) {
+        if (my $v = $h{$field}) {
+            if (! UNIVERSAL::isa($v, 'XML::RSS::LibXML::ElementSpec')) {
+                $c->$field(UNIVERSAL::isa($v, 'XML::RSS::LibXML::MagicElement') ? $v : %$v);
+            }
+        }
+    }
     $c->channel(%h);
-    if ($h{textinput}) {
-        $c->{textinput} = $h{textinput};
-    }
-    if ($h{image}) {
-        $c->{image} = $h{image};
-    }
 }
 
 sub parse_items
@@ -201,14 +222,16 @@ sub create_dom
         my $inode = $dom->createElement('image');
         $self->create_element_from_spec($image, $dom, $inode, \%ImageElements);
         $self->create_extra_modules($image, $dom, $inode, $c->namespaces);
-        $root->appendChild($inode);
+        $channel->appendChild($inode);
     }
 
     if (my $textinput = $c->textinput) {
+use Data::Dumper;
+print Dumper($textinput);
         my $inode = $dom->createElement('textInput');
         $self->create_element_from_spec($textinput, $dom, $inode, \%TextInputElements);
         $self->create_extra_modules($textinput, $dom, $inode, $c->namespaces);
-        $root->appendChild($inode);
+        $channel->appendChild($inode);
     }
 
     return $dom;
@@ -230,6 +253,18 @@ sub create_channel
     my $channel = $dom->createElement('channel');
 
     $self->create_element_from_spec($c->channel, $dom, $channel, \%ChannelElements);
+
+    foreach my $type qw(day hour) {
+        my $field = 'skip' . ucfirst($type) . 's';
+        my $skip = $c->$field;
+        if ($skip && defined $skip->{$type}) {
+            my $sd = $dom->createElement($field);
+            my $d  = $dom->createElement($type);
+            $d->appendChild($dom->createTextNode($skip->{$type}));
+            $sd->appendChild($d);
+            $channel->appendChild($sd);
+        }
+    }
     $root->appendChild($channel);
 }
 
@@ -242,6 +277,22 @@ sub create_items
         my $item = $dom->createElement('item');
         $self->create_element_from_spec($i, $dom, $item, \%ItemElements);
         $self->create_extra_modules($i, $dom, $item, $c->namespaces);
+        my $guid = $i->{guid};
+        if (defined $guid) {
+            my $guid_element = $dom->createElement('guid');
+            if (eval { $guid->isa('XML::RSS::LibXML::MagicElement') }) {
+                my $isperma = 'true';
+                if (! $guid->{isPermaLink} || $guid->{isPermaLink} ne 'true') {
+                    $isperma = 'false';
+                }
+                $guid_element->setAttribute(isPermaLink => $isperma);
+                $guid_element->appendChild($dom->createTextNode($guid->toString));
+            } else {
+                $guid_element->setAttribute(isPermaLink => "false");
+                $guid_element->appendChild($dom->createTextNode($guid));
+            }
+            $item->appendChild($guid_element);
+        }
 
         $channel->appendChild($item);
     }

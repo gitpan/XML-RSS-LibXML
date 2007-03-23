@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.30_02 23 Mar 2007
+  - Make things more compatible with t/items-are-0.t
+
 0.30_01 14 Mar 2007
   - BEWARE! MAJOR CHANGE IN CODE!
   - Compatiblity with XML::RSS-1.29_02's test suite.

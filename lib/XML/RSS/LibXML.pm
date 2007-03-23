@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: LibXML.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -109,8 +109,19 @@ sub create_impl
         $version = "Null";
     }
 
-    my $pkg = "XML::RSS::LibXML::$version";
-    $pkg->require or die;
+    my $pkg;
+    REQUIRE: {
+        $pkg = "XML::RSS::LibXML::$version";
+        eval {
+            $pkg->require or die;
+        };
+        if (my $e = $@) {
+            if ($e =~ /Can't locate/) {
+                $version = "V1_0";
+                redo REQUIRE;
+            }
+        }
+    }
     return $pkg->new;
 }
 
@@ -388,6 +399,23 @@ Parse an RSS file specified by $filename
 
 These methods are used to generate RSS. See the documentation for XML::RSS
 for details. Currently RSS version 0.9, 1.0, and 2.0 are supported.
+
+Additionally, add_item takes an extra parameter, "mode", which allows
+you to add items either in front of the list or at the end of the list:
+
+   $rss->add_item(
+      mode => "append",
+      title => "...",
+      link  => "...",
+   );
+
+   $rss->add_item(
+      mode => "insert",
+      title => "...",
+      link  => "...",
+   );
+
+By default, items are appended to the end of the list
 
 =head2 as_string($format)
 

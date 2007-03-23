@@ -1,4 +1,4 @@
-# $Id: MagicElement.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: MagicElement.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -52,7 +52,7 @@ sub attributes
 sub toString
 {
     my $self = shift;
-    return $self->{_content} || join('', map {$self->{$_} } $self->attributes);
+    return defined $self->{_content} && length $self->{_content} ? $self->{_content} : join('', map {$self->{$_} } $self->attributes);
 }
 
 1;

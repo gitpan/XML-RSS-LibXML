@@ -1,4 +1,4 @@
-# $Id: V0_9.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: V0_9.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -9,6 +9,40 @@ use base qw(XML::RSS::LibXML::ImplBase);
 use Carp qw(croak);
 use XML::RSS::LibXML::Namespaces qw(NS_RSS09 NS_RDF);
 
+my $format_dates = sub {
+    my $v = eval {
+        DateTime::Format::W3CDTF->format_datetime(
+            DateTime::Format::Mail->parse_datetime($_[0])
+        );
+    };
+    if ($v && ! $@) {
+        $_[0] = $v;
+    }
+};
+
+my %DcElements = (
+    'dc:date' => {
+        candidates => [
+            { module => 'dc', element => 'date' },
+            'pubDate',
+            'lastBuildDate',
+        ],  
+        callback => $format_dates
+    },  
+    (map { ("dc:$_" => [ { module => 'dc', element => $_ } ]) }
+        qw(language rights publisher creator title subject description contributer type format identifier source relation coverage)),
+);
+
+my %ImageElements = (
+    (map { ($_ => [$_]) } qw(title url link)),
+    %DcElements,
+);
+
+my %TextInputElements = (
+    (map { ($_ => [$_]) } qw(title link description name)),
+    %DcElements
+);
+
 sub definition
 {
     return {
@@ -17,17 +51,17 @@ sub definition
             description => '',
             link        => '',
         },
-        image => {
+        image => bless({
             title => undef,
             url   => undef,
             link  => undef,
-        },
-        textinput => {
+        }, 'XML::RSS::LibXML::ElementSpec'),
+        textinput => bless({
             title       => undef,
             description => undef,
             name        => undef,
             link        => undef,
-        },
+        }, 'XML::RSS::LibXML::ElementSpec'),
     },
 }
 
@@ -79,6 +113,7 @@ sub parse_dom
     $dom->getDocumentElement()->setNamespace(NS_RSS09, $c->internal('prefix'), 0);
     $self->parse_channel($c, $dom);
     $self->parse_items($c, $dom);
+    $self->parse_misc_simple($c, $dom);
 }
 
 sub parse_namespaces
@@ -103,6 +138,12 @@ sub parse_channel
 
     my ($root) = $xc->findnodes('/rdf:RDF/rss09:channel', $dom);
     my %h = $self->parse_children($c, $root);
+    foreach my $field qw(textinput image) {
+        delete $h{$field};
+#        if (my $v = $h{$field}) {
+#            $c->$field(UNIVERSAL::isa($v, 'XML::RSS::LibXML::MagicElement') ? $v : %$v);
+#        }
+    }
     $c->channel(%h);
 }
 
@@ -123,6 +164,30 @@ sub parse_items
     }
 }
 
+sub parse_misc_simple
+{
+    my ($self, $c, $dom) = @_;
+
+    my $xc = $c->create_xpath_context($c->{namespaces});
+    foreach my $node ($xc->findnodes('/rdf:RDF/*[name() != "channel" and name() != "item"]', $dom)) {
+        my $h = $self->parse_children($c, $node);
+        my $name = $node->localname;
+        $name = 'textinput' if $name eq 'textInput';
+        my $prefix = $node->getPrefix();
+        if ($prefix) {
+            $c->{$prefix} ||= {};
+            $self->store_element($c->{$prefix}, $name, $h);
+
+            # XML::RSS requires us to allow access to elements both from
+            # the prefix and the namespace
+            $c->{$c->{namespaces}{$prefix}} ||= {};
+            $self->store_element($c->{$c->{namespaces}{$prefix}}, $name, $h);
+        } else {
+            $self->store_element($c, $name, $h);
+        }
+    }
+}
+
 sub validate_item
 {
     my $self = shift;
@@ -131,7 +196,7 @@ sub validate_item
 
     # make sure we have a title and link
     croak "title and link elements are required"
-      unless ($h->{title} && $h->{'link'});
+      unless (defined $h->{title} && defined $h->{'link'});
 
     # check string lengths
     croak "title cannot exceed 100 characters in length"
@@ -144,6 +209,45 @@ sub validate_item
 
     # make sure there aren't already 15 items
     croak "total items cannot exceed 15 " if (@{$c->items} >= 15);
+}
+
+sub create_dom
+{
+    my ($self, $c) = @_;
+
+    my $dom = $self->SUPER::create_dom($c);
+    my $xc = $c->create_xpath_context($c->namespaces);
+    my ($channel) = $xc->findnodes('/rdf:RDF/channel', $dom);
+    my $root = $dom->getDocumentElement();
+    if (my $image = $c->image) {
+        my $inode;
+
+        $inode = $dom->createElement('image');
+        $inode->setAttribute('rdf:resource', $image->{url}) if defined $image->{url};
+        $channel->appendChild($inode);
+
+        $inode = $dom->createElement('image');
+        $inode->setAttribute('rdf:resource', $image->{url}) if defined $image->{url};
+        $self->create_element_from_spec($image, $dom, $inode, \%ImageElements);
+        $self->create_extra_modules($image, $dom, $inode, $c->namespaces);
+        $root->appendChild($inode);
+    }
+
+    if (my $textinput = $c->textinput) {
+        my $inode;
+
+        $inode = $dom->createElement('textinput');
+        $inode->setAttribute('rdf:resource', $textinput->{link}) if $textinput->{link};
+        $channel->appendChild($inode);
+
+        $inode = $dom->createElement('textinput');
+        $inode->setAttribute('rdf:resource', $textinput->{link}) if $textinput->{link};
+        $self->create_element_from_spec($textinput, $dom, $inode, \%TextInputElements);
+        $self->create_extra_modules($textinput, $dom, $inode, $c->namespaces);
+        $root->appendChild($inode);
+    }
+
+    return $dom;
 }
 
 sub create_rootelement

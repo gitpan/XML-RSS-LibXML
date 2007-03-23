@@ -9,14 +9,10 @@
         <rdf:li rdf:resource="http://item.url/"/>
       </rdf:Seq>
     </items>
-    <image/>
-    <textInput/>
   </channel>
   <item rdf:about="http://item.url/">
     <link>http://item.url/</link>
     <description>Item Description (&amp;copy;)</description>
     <title>Item Title</title>
   </item>
-  <image/>
-  <textInput/>
 </rdf:RDF>

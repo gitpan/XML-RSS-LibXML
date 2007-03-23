@@ -1,4 +1,4 @@
-# $Id: V0_91.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: V0_91.pm 36 2007-03-23 05:25:29Z daisuke $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -51,12 +51,24 @@ my %ChannelElements = (
     category => [ { module => 'dc', element => 'category' }, 'category' ],
     generator => [ { module => 'dc', element => 'generator' }, 'generator' ],
     ttl => [ { module => 'dc', element => 'ttl' }, 'ttl' ],
+    rating => [ 'rating' ],
 );
+delete $ChannelElements{'dc:creator'};
 
 my %ItemElements = (
     %DcElements,
     map { ($_ => [$_]) }
         qw(title link description author category comments pubDate)
+);
+
+my %ImageElements = (
+    (map { ($_ => [$_]) } qw(title url link description width height)),
+    %DcElements,
+);
+
+my %TextInputElements = (
+    (map { ($_ => [$_]) } qw(title link description name)),
+    %DcElements
 );
 
 sub definition 
@@ -75,22 +87,22 @@ sub definition
             rating         => undef,
             webMaster      => undef,
         },
-        image => {
+        image => bless({
             title       => undef,
             url         => undef,
             'link'      => undef,
             width       => undef,
             height      => undef,
             description => undef,
-        },
+        }, 'XML::RSS::LibXML::ElementSpec'),
         skipDays  => {day  => undef,},
         skipHours => {hour => undef,},
-        textinput => {
+        textinput => bless({
             title       => undef,
             description => undef,
             name        => undef,
             'link'      => undef,
-        }
+        }, 'XML::RSS::LibXML::ElementSpec'),
     }
 }
 
@@ -155,6 +167,13 @@ sub parse_channel
 
     my ($root) = $xc->findnodes('/rss/channel', $dom);
     my %h = $self->parse_children($c, $root);
+
+    foreach my $type qw(day hour) {
+        my $field = 'skip' . ucfirst($type) . 's';
+        if (my $skip = delete $h{$field}) {
+            $c->$field(%$skip);
+        }
+    }
     $c->channel(%h);
 }
 
@@ -205,6 +224,40 @@ sub create_channel
     my $root = $dom->getDocumentElement();
     my $channel = $dom->createElement('channel');
     $self->create_element_from_spec($c->channel, $dom, $channel, \%ChannelElements);
+
+    if (my $image = $c->image) {
+        if (! UNIVERSAL::isa($image, 'XML::RSS::LibXML::ElementSpec')) {
+            my $inode;
+
+            $inode = $dom->createElement('image');
+            $self->create_element_from_spec($image, $dom, $inode, \%ImageElements);
+            $self->create_extra_modules($image, $dom, $inode, $c->namespaces);
+            $channel->appendChild($inode);
+        }
+    }
+
+    if (my $textinput = $c->textinput) {
+        if (! UNIVERSAL::isa($textinput, 'XML::RSS::LibXML::ElementSpec')) {
+            my $inode;
+
+            $inode = $dom->createElement('textinput');
+            $self->create_element_from_spec($textinput, $dom, $inode, \%TextInputElements);
+            $self->create_extra_modules($textinput, $dom, $inode, $c->namespaces);
+            $channel->appendChild($inode);
+        }
+    }
+
+    foreach my $type qw(day hour) {
+        my $field = 'skip' . ucfirst($type) . 's';
+        my $skip = $c->$field;
+        if ($skip && defined $skip->{$type}) {
+            my $sd = $dom->createElement($field);
+            my $d  = $dom->createElement($type);
+            $d->appendChild($dom->createTextNode($skip->{$type}));
+            $sd->appendChild($d);
+            $channel->appendChild($sd);
+        }
+    }
     $root->appendChild($channel);
 }
 
