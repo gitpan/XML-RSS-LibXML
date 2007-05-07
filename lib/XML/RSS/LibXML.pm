@@ -1,4 +1,4 @@
-# $Id: LibXML.pm 36 2007-03-23 05:25:29Z daisuke $
+# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 7079 2007-05-07T15:12:17.278193Z daisuke  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -321,9 +321,8 @@ and that meant that there were a lot of features to keep up with.
 To keep compatibility, I've had to pretty much rewrite the module from
 ground up.
 
-For the first few iterations, I plan on releasing XML::RSS::LibXML while
-it's in alpha stage. You probably don't want to install this in your
-production environment while this disclaimer appears in the docs
+Now XML::RSS::LibXML is *almost* compatible with XML::RSS. If there are
+problems, please send in bug reports (or more preferrably, patches ;)
 
 =head1 COMPATIBILITY
 

@@ -1,5 +1,5 @@
 use strict;
-
+use File::Spec;
 use Test::More;
 plan tests => 22;
 
@@ -19,8 +19,9 @@ BEGIN {
   $pub_date     = &POSIX::strftime(DATE_TEMPLATE_PUB,   gmtime);
 }
 
+use constant BASEDIR => File::Spec->catdir('t', 'generated');
 use constant RSS_VERSION    => "1.0";
-use constant RSS_SAVEAS     => "./t/generated/".RSS_VERSION."-generated.xml";
+use constant RSS_SAVEAS     => File::Spec->catfile(BASEDIR, RSS_VERSION."-generated.xml");
 use constant RSS_MOD_PREFIX => "my";
 use constant RSS_MOD_URI    => 'http://purl.org/my/rss/module/';
 
@@ -28,6 +29,10 @@ use constant RSS_CREATOR    => "joeuser\@example.com";
 use constant RSS_ITEM_TITLE => "This is an item";
 use constant RSS_ITEM_LINK  => "http://example.com/$short_date";
 use constant RSS_ITEM_DESC  => "Yadda & yadda & yadda";
+
+if(! -d BASEDIR) {
+    mkdir(BASEDIR) or die "Could not create dir " . BASEDIR . ": $!"
+}
 
 # 3
 ok($current_date,"Current date:$current_date");

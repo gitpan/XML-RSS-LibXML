@@ -3,6 +3,10 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.30 08 May 2007
+  - Move to Module::Install
+  - Tweak tests.
+
 0.30_02 23 Mar 2007
   - Make things more compatible with t/items-are-0.t
 

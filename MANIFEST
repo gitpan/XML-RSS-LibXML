@@ -1,10 +1,8 @@
-Build.PL
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
-inc/Module/Install/Build.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
 inc/Module/Install/Include.pm
@@ -29,20 +27,17 @@ t/0.9-parse.t
 t/0.9-strict.t
 t/0.91-parse.t
 t/1.0-generate.t
-t/1.0-generated.xml
 t/1.0-parse-2.t
 t/1.0-parse-exotic.t
 t/1.0-parse.t
 t/1.0-to-2.0.t
 t/2.0-generate.t
-t/2.0-generated.xml
 t/2.0-modules.t
 t/2.0-parse-2.t
 t/2.0-parse.t
 t/2.0-permalink.t
 t/2.0-wo-title.t
 t/add-item-insert-vs-append.t
-t/charset1-generated.xml
 t/charset1.t
 t/data/1.0/rss1.0.exotic.rdf
 t/data/1.0/with_content.rdf
@@ -59,7 +54,6 @@ t/encoding.t
 t/generated/1.0-generated.xml
 t/generated/2.0-generated.xml
 t/generated/charset1-generated.xml
-t/generated/placeholder.txt
 t/guid.t
 t/items-are-0.t
 t/load.t
@@ -70,7 +64,6 @@ t/regress-content-encoded.t
 t/regress-namespace-attr.t
 t/rss2-gt-encoding.t
 t/synopsis.t
-t/test_manifest
 t/unsupported.t
 t/version.t
 t/xml-header.t

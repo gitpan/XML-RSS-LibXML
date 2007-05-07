@@ -1,2 +1,0 @@
-This file is a placeholder to make sure the distribution contains the
-./t/generated/ directory.

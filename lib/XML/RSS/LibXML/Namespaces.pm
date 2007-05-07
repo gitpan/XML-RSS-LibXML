@@ -1,4 +1,4 @@
-# $Id: Namespaces.pm 33 2007-03-14 03:06:58Z daisuke $
+# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/Namespaces.pm 7074 2007-05-07T14:41:59.593216Z daisuke  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.

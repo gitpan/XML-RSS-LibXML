@@ -1,5 +1,5 @@
 use strict;
-
+use File::Spec;
 use Test::More tests => 27;
 
 BEGIN {
@@ -16,9 +16,9 @@ my $short_date   = &POSIX::strftime( DATE_TEMPLATE_SHORT, gmtime );
 my $pub_date     = &POSIX::strftime( DATE_TEMPLATE_PUB,   gmtime );
 ok( $current_date, "Current date: $current_date" );
 
+use constant BASEDIR => File::Spec->catdir('t', 'generated');
 use constant RSS_VERSION    => "2.0";
-use constant RSS_SAVEAS     => "t/generated/" . RSS_VERSION . "-generated.xml";
-
+use constant RSS_SAVEAS     => File::Spec->catfile(BASEDIR, RSS_VERSION."-generated.xml");
 use constant RSS_MOD_PREFIX => "my";
 use constant RSS_MOD_URI    => 'http://purl.org/my/rss/module/';
 
