@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 7074 2007-05-07T14:41:59.593216Z daisuke  $
+# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 7115 2007-05-08T23:03:10.283029Z daisuke  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -226,8 +226,6 @@ sub create_dom
     }
 
     if (my $textinput = $c->textinput) {
-use Data::Dumper;
-print Dumper($textinput);
         my $inode = $dom->createElement('textInput');
         $self->create_element_from_spec($textinput, $dom, $inode, \%TextInputElements);
         $self->create_extra_modules($textinput, $dom, $inode, $c->namespaces);
