@@ -51,6 +51,9 @@ t/enclosures.t
 t/enclosures2.t
 t/encode-output.t
 t/encoding.t
+t/generated/1.0-generated.xml
+t/generated/2.0-generated.xml
+t/generated/charset1-generated.xml
 t/guid.t
 t/items-are-0.t
 t/load.t

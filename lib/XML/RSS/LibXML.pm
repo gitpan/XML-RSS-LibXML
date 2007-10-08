@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 7079 2007-05-07T15:12:17.278193Z daisuke  $
+# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 2918 2007-10-08T04:08:47.734853Z daisuke  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -13,7 +13,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-our $VERSION = '0.3001';
+our $VERSION = '0.3002';
 
 __PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
@@ -169,7 +169,7 @@ sub get_namespaces
     my $self = shift;
     my $node = shift;
     my %h = map {
-        (($_->getName() || '#default') => $_->getData)
+        (($_->getLocalName() || '#default') => $_->getData)
     } $node->getNamespaces();
 
 #    while (my($p, $uri) = each %h) {

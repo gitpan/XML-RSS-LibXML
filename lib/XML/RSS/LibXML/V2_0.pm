@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 7115 2007-05-08T23:03:10.283029Z daisuke  $
+# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 2285 2007-05-08T23:03:10.283029Z daisuke  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.

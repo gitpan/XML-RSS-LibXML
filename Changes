@@ -3,6 +3,9 @@ Changes
 
 Except where noted, all changes made by Daisuke Maki
 
+0.3002 - 08 Oct 2007
+  - Apply fix from AAR (rt #29683) to make things work with XML::LibXML >= 1.64
+
 0.3001 - 09 May 2007
   - Fix Makefile.PL dependency
   - Remove stray debug output
