@@ -1,4 +1,4 @@
-# $Id: /mirror/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/MagicElement.pm 2259 2007-05-07T14:41:59.593216Z daisuke  $
+# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/MagicElement.pm 66337 2008-07-17T12:09:29.211352Z daisuke  $
 #
 # Copyright (c) 2005 Daisuke Maki <dmaki@cpan.org>
 # All rights reserved.
@@ -52,7 +52,10 @@ sub attributes
 sub toString
 {
     my $self = shift;
-    return defined $self->{_content} && length $self->{_content} ? $self->{_content} : join('', map {$self->{$_} } $self->attributes);
+    return (defined $self->{_content} && length $self->{_content}) ?
+        $self->{_content} :
+#        '';
+        join('', map {$self->{$_} } $self->attributes);
 }
 
 1;

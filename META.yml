@@ -1,23 +1,26 @@
---- 
-abstract: XML::RSS with XML::LibXML
-author: -2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved.
+---
+abstract: 'XML::RSS with XML::LibXML'
+author:
+  - '-2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved.'
 distribution_type: module
-generated_by: Module::Install version 0.67
+generated_by: 'Module::Install version 0.77'
 license: perl
-meta-spec: 
-  url: http://module-build.sourceforge.net/META-spec-v1.3.html
-  version: 1.3
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 name: XML-RSS-LibXML
-no_index: 
-  directory: 
+no_index:
+  directory:
     - inc
     - t
-requires: 
+requires:
   Class::Accessor::Fast: 0
   DateTime::Format::Mail: 0
   DateTime::Format::W3CDTF: 0
   Encode: 0
   UNIVERSAL::require: 0
-  XML::LibXML: 0
+  XML::LibXML: 1.66
   XML::LibXML::XPathContext: 0
-version: 0.3002
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.3003

@@ -51,15 +51,13 @@ t/enclosures.t
 t/enclosures2.t
 t/encode-output.t
 t/encoding.t
-t/generated/1.0-generated.xml
-t/generated/2.0-generated.xml
-t/generated/charset1-generated.xml
 t/guid.t
 t/items-are-0.t
 t/load.t
 t/pod-coverage.t
 t/pod.t
 t/regress-2.0-namespace.t
+t/regress-broken-image.t
 t/regress-content-encoded.t
 t/regress-namespace-attr.t
 t/rss2-gt-encoding.t
