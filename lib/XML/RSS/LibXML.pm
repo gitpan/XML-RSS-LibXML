@@ -1,7 +1,4 @@
-# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 92874 2008-11-26T08:46:35.232842Z daisuke  $
-#
-# Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
-# All rights reserved.
+# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 98843 2009-01-20T00:12:11.747517Z daisuke  $
 
 package XML::RSS::LibXML;
 use strict;
@@ -13,7 +10,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-our $VERSION = '0.3003';
+our $VERSION = '0.3004';
 
 __PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
@@ -36,7 +33,8 @@ sub new
         libxml_opts => $args{libxml_opts} || {
             recover => 1,
             load_ext_dtd => 0
-        }
+        },
+        'xml:base' => $args{'xml:base'},
     }, $class;
 
     $self->impl->reset($self);

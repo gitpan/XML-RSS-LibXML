@@ -1,4 +1,4 @@
-# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 92871 2008-11-26T08:43:51.188354Z daisuke  $
+# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 93774 2008-12-02T06:24:35.638916Z miyagawa  $
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.
@@ -155,7 +155,7 @@ sub parse_channel
         my $field = 'skip' . ucfirst($type) . 's';
         if (my $skip = delete $h{$field}) {
             if (ref $skip ne 'HASH') {
-                warn "field $field has invalid entry (does this RSS validate?)";
+#                warn "field $field has invalid entry (does this RSS validate?)";
             } elsif (! UNIVERSAL::isa($skip, 'XML::RSS::LibXML::ElementSpec')) {
                 $c->$field(UNIVERSAL::isa($skip, 'XML::RSS::LibXML::MagicElement') ? $skip : %$skip);
             }
@@ -165,7 +165,7 @@ sub parse_channel
     foreach my $field qw(textinput image) {
         if (my $v = $h{$field}) {
             if (ref $v ne 'HASH') {
-                warn "field $field has invalid entry (does this RSS validate?)";
+#                warn "field $field has invalid entry (does this RSS validate?)";
             } elsif (! UNIVERSAL::isa($v, 'XML::RSS::LibXML::ElementSpec')) {
                 $c->$field(UNIVERSAL::isa($v, 'XML::RSS::LibXML::MagicElement') ? $v : %$v);
             }
