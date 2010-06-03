@@ -2,8 +2,12 @@
 abstract: 'XML::RSS with XML::LibXML'
 author:
   - '-2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved.'
+build_requires:
+  ExtUtils::MakeMaker: 6.42
+configure_requires:
+  ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 0.77'
+generated_by: 'Module::Install version 0.98'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -13,6 +17,7 @@ no_index:
   directory:
     - inc
     - t
+    - xt
 requires:
   Class::Accessor::Fast: 0
   DateTime::Format::Mail: 0
@@ -23,4 +28,5 @@ requires:
   XML::LibXML::XPathContext: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.3004
+  repository: git://github.com/lestrrat/XML-RSS-LibXML.git
+version: 0.3005

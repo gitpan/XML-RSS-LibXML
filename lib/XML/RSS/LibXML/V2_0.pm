@@ -1,4 +1,4 @@
-# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML/V2_0.pm 93774 2008-12-02T06:24:35.638916Z miyagawa  $
+# $Id$
 #
 # Copyright (c) 2005-2007 Daisuke Maki <daisuke@endeworks.jp>
 # All rights reserved.

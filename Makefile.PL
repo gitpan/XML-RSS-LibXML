@@ -13,5 +13,8 @@ requires 'UNIVERSAL::require';
 requires 'XML::LibXML', '1.66';
 requires 'XML::LibXML::XPathContext';
 
+auto_set_repository;
 auto_install;
+tests 't/*.t';
+author_tests 'xt';
 WriteAll;

@@ -1,5 +1,3 @@
-# $Id: /mirror/coderepos/lang/perl/XML-RSS-LibXML/trunk/lib/XML/RSS/LibXML.pm 98843 2009-01-20T00:12:11.747517Z daisuke  $
-
 package XML::RSS::LibXML;
 use strict;
 use warnings;
@@ -10,7 +8,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-our $VERSION = '0.3004';
+our $VERSION = '0.3005';
 
 __PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
@@ -104,22 +102,23 @@ sub create_impl
 {
     my $self = shift;
     my $version = shift;
+    my $module = "Null";
     if ($version) {
-        $version =~ s/\./_/g;
-        $version = "V$version";
-    } else {
-        $version = "Null";
+        $module = $version;
+        $module =~ s/\./_/g;
+        $module = "V$module";
     }
 
     my $pkg;
     REQUIRE: {
-        $pkg = "XML::RSS::LibXML::$version";
+        $pkg = "XML::RSS::LibXML::$module";
         eval {
             $pkg->require or die;
         };
         if (my $e = $@) {
             if ($e =~ /Can't locate/) {
-                $version = "V1_0";
+                $module = "V1_0";
+                $version = '1.0';
                 redo REQUIRE;
             }
         }
@@ -212,6 +211,7 @@ sub guess_version_from_dom
             last;
         }
     }
+
     if ($rss10_prefix && $rss10_prefix eq '#default') {
         $rss10_prefix = 'rss10';
         $namespaces->{$rss10_prefix} = NS_RSS10;
@@ -242,6 +242,7 @@ sub guess_version_from_dom
     } else {
         die "Failed to guess version";
     }
+    $version = "$1.0" if $version =~ /^(\d)$/;
     return $version;
 }
 
@@ -463,6 +464,11 @@ Instead of
   }
 
 In scalar context, returns the reference to the list of items.
+
+=head2 create_libxml()
+
+Creates, configures, and returns an XML::LibXML object. Used by C<parse()> to
+instantiate the parser used to parse the feed.
 
 =head1 PERFORMANCE
 

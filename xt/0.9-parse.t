@@ -1,8 +1,6 @@
 use strict;
 use Test::More;
 
-plan skip_all => q|Won't test RSS 0.9x. See Changes for details|;
-
 use constant RSS_VERSION       => "0.9";
 use constant RSS_CHANNEL_TITLE => "Example 0.9 Channel";
 
@@ -68,6 +66,8 @@ foreach my $item (@{$xml->{items}}) {
 }
 
 ok($ok,"All items have title and link elements");
+
+done_testing();
 
 __END__
 
