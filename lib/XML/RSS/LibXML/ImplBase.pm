@@ -137,6 +137,17 @@ sub store_element
 
 sub parse_dom { }
 
+sub parse_base
+{
+    my ($self, $c, $dom) = @_;
+    my $xc = $c->create_xpath_context(scalar $c->namespaces);
+    if (my $b = $xc->findvalue('/rss/@xml:base', $dom)) {
+        $c->base($b);
+    } else {
+        $c->base(undef);
+    }
+}
+
 sub parse_namespaces
 {   
     my ($self, $c, $dom) = @_;
@@ -184,6 +195,10 @@ sub parse_misc_simple
 {
 }
 
+sub may_have_children {
+    qw(channel item image textinput skipHours skipDays)
+}
+
 sub parse_children
 {
     my ($self, $c, $node, $xpath) = @_;
@@ -200,7 +215,12 @@ sub parse_children
         $name = 'textinput' if ($name eq 'textInput');
         my $val    = undef;
         if ($child->findnodes('./*')) {
-            $val = $self->parse_children($c, $child);
+            if (!grep { $_ eq $name } $self->may_have_children) {
+                # Urk. Should have been encoded and wasn't! Stupid thing.
+                $val = join '', map { $_->toString } $child->childNodes;
+            } else {
+                $val = $self->parse_children($c, $child);
+            }
         } else {
             my $text   = $child->textContent();
             $text = '' if $text !~ /\S/ ;

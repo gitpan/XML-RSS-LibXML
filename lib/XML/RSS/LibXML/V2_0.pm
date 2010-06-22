@@ -115,19 +115,6 @@ sub definition
     };
 }
 
-sub add_item
-{
-    my $self = shift;
-    my $c    = shift;
-    my $h    = ref($_[0]) eq 'HASH' ? $_[0] : {@_};
-
-    if (! defined $h->{description} && ! defined $h->{title}) {
-        return;
-    }
-
-    $self->SUPER::add_item($c, $h);
-}
-
 sub parse_dom
 {
     my $self = shift;
@@ -136,11 +123,14 @@ sub parse_dom
 
     $c->reset;
     $c->version('2.0');
+    $c->encoding($dom->encoding);
+    $self->parse_base($c, $dom);
     $self->parse_namespaces($c, $dom);
     $self->parse_channel($c, $dom);
     $self->parse_items($c, $dom);
     $self->parse_misc_simple($c, $dom);
 }
+
 
 sub parse_channel
 {
@@ -244,6 +234,9 @@ sub create_rootelement
     my ($self, $c, $dom) = @_;
     my $root = $dom->createElement('rss');
     $root->setAttribute(version => '2.0');
+    if (my $base = $c->base) {
+        $root->setAttribute('xml:base' => $base);
+    }
     $dom->setDocumentElement($root);
 }
 

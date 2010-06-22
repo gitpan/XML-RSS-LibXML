@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rss xmlns:my="http://purl.org/my/rss/module/" version="2.0">
+<rss xmlns:my="http://purl.org/my/rss/module/" version="2.0" xml:base="http://yow.com/">
   <channel>
     <ttl>60</ttl>
     <copyright>Copyright 2002</copyright>
@@ -10,20 +10,20 @@
     <link>http://example.com/</link>
     <language>en-us</language>
     <description/>
-    <lastBuildDate>2010-06-03T01:47:39+0900</lastBuildDate>
+    <lastBuildDate>2010-06-22T01:00:37+0900</lastBuildDate>
     <title>Test 2.0 Feed</title>
-    <pubDate>2010-06-03T01:47:39+0900</pubDate>
+    <pubDate>2010-06-22T01:00:37+0900</pubDate>
     <managingEditor>editor\@example.com</managingEditor>
     <item>
       <author>joeuser@example.com</author>
-      <comments>http://example.com/2010/06/03/comments.html</comments>
+      <comments>http://example.com/2010/06/22/comments.html</comments>
       <category>MyCategory</category>
-      <link>http://example.com/2010/06/03</link>
-      <enclosure>HASH(0x9ceb30)</enclosure>
+      <link>http://example.com/2010/06/22</link>
+      <enclosure>HASH(0x8faca0)</enclosure>
       <description>Yadda yadda yadda - R&amp;D;</description>
       <title>This is an item</title>
-      <pubDate>木  6/ 3 01:47:39 2010 GMT</pubDate>
-      <guid isPermaLink="true">http://example.com/2010/06/03</guid>
+      <pubDate>火  6/22 01:00:37 2010 GMT</pubDate>
+      <guid isPermaLink="true">http://example.com/2010/06/22</guid>
     </item>
     <image>
       <url>http://example.com/example.gif</url>
