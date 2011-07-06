@@ -13,6 +13,9 @@ use overload
 use vars qw($VERSION);
 $VERSION = '0.02';
 
+# Make UNIVERSAL::isa happy
+sub isa { __PACKAGE__ eq ($_[1] || '') } 
+
 sub new
 {
     my $class = shift;
@@ -54,8 +57,7 @@ sub toString
     my $self = shift;
     return (defined $self->{_content} && length $self->{_content}) ?
         $self->{_content} :
-#        '';
-        join('', map {$self->{$_} } $self->attributes);
+        join('', map { $self->{$_} || '' } $self->attributes);
 }
 
 1;

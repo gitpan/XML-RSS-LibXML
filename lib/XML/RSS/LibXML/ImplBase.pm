@@ -124,14 +124,14 @@ sub reset
 sub store_element
 {
     my ($self, $container, $name, $value) = @_;
-    if (exists $container->{$name} && ! eval { $container->{$name}->isa('XML::RSS::LibXML::ElementSpec') }) {
-        if (ref($container->{$name}) eq 'ARRAY') {
-            push @{ $container->{$name} }, $value;
-        } else {
-            $container->{$name} = [ $container->{$name}, $value ];
-        }
-    } else {
+
+    my $v = $container->{$name};
+    if (! $v || eval { $v->isa('XML::RSS::LibXML::ElementSpec') }) {
         $container->{$name} = $value;
+    } elsif (ref($v) eq 'ARRAY') {
+        push @$v, $value;
+    } else {
+        $container->{$name} = [ $v, $value ];
     }
 }
 
