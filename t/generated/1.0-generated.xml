@@ -3,18 +3,18 @@
   <channel rdf:about="http://example.com/">
     <link>http://example.com/</link>
     <description>To lead by example</description>
-    <dc:date>2011-07-06T04:45:23+0900</dc:date>
+    <dc:date>2011-09-13T22:49:19+0900</dc:date>
     <title>Test 1.0 Feed</title>
     <items>
       <rdf:Seq>
-        <rdf:li rdf:resource="http://example.com/2011/07/06"/>
+        <rdf:li rdf:resource="http://example.com/2011/09/13"/>
       </rdf:Seq>
     </items>
     <image rdf:resource="http://example.com/example.gif"/>
     <textinput rdf:resource="http://example.com/search.pl"/>
   </channel>
-  <item rdf:about="http://example.com/2011/07/06">
-    <link>http://example.com/2011/07/06</link>
+  <item rdf:about="http://example.com/2011/09/13">
+    <link>http://example.com/2011/09/13</link>
     <description>Yadda &amp; yadda &amp; yadda</description>
     <dc:creator>joeuser@example.com</dc:creator>
     <title>This is an item</title>

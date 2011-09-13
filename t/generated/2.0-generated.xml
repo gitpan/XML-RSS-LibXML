@@ -10,20 +10,20 @@
     <link>http://example.com/</link>
     <language>en-us</language>
     <description/>
-    <lastBuildDate>2011-07-06T04:45:24+0900</lastBuildDate>
+    <lastBuildDate>2011-09-13T22:49:20+0900</lastBuildDate>
     <title>Test 2.0 Feed</title>
-    <pubDate>2011-07-06T04:45:24+0900</pubDate>
+    <pubDate>2011-09-13T22:49:20+0900</pubDate>
     <managingEditor>editor\@example.com</managingEditor>
     <item>
       <author>joeuser@example.com</author>
-      <comments>http://example.com/2011/07/06/comments.html</comments>
+      <comments>http://example.com/2011/09/13/comments.html</comments>
       <category>MyCategory</category>
-      <link>http://example.com/2011/07/06</link>
-      <enclosure>HASH(0x100b85648)</enclosure>
+      <link>http://example.com/2011/09/13</link>
+      <enclosure>HASH(0x100b58838)</enclosure>
       <description>Yadda yadda yadda - R&amp;D;</description>
       <title>This is an item</title>
-      <pubDate>水  7/ 6 04:45:24 2011 GMT</pubDate>
-      <guid isPermaLink="true">http://example.com/2011/07/06</guid>
+      <pubDate>火  9/13 22:49:20 2011 GMT</pubDate>
+      <guid isPermaLink="true">http://example.com/2011/09/13</guid>
     </item>
     <image>
       <url>http://example.com/example.gif</url>

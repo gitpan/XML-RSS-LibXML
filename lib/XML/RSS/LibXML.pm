@@ -8,7 +8,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-our $VERSION = '0.3101';
+our $VERSION = '0.3102';
 
 __PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
@@ -89,7 +89,7 @@ sub add_module
     if ($args{prefix} eq '#default') {
         # no op
     } else {
-        $args{prefix} =~ /^[a-z_][a-zA-Z0-9.\-_]*$/
+        $args{prefix} =~ /^[a-zA-Z_][a-zA-Z0-9.\-_]*$/
             or croak "a namespace prefix should look like [a-z_][a-z0-9.\\-_]*";
     }
 
