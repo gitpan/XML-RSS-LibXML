@@ -3,11 +3,13 @@ abstract: 'XML::RSS with XML::LibXML'
 author:
   - '-2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved.'
 build_requires:
-  ExtUtils::MakeMaker: 6.42
+  ExtUtils::MakeMaker: 6.36
 configure_requires:
-  ExtUtils::MakeMaker: 6.42
-distribution_type: module
-generated_by: 'Module::Install version 1.01'
+  CPAN::Meta: 0
+  CPAN::Meta::Prereqs: 0
+  Module::Build: 0.38
+dynamic_config: 0
+generated_by: 'Minilla/v0.11.0, CPAN::Meta::Converter version 2.132140'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -15,9 +17,37 @@ meta-spec:
 name: XML-RSS-LibXML
 no_index:
   directory:
-    - inc
     - t
     - xt
+    - inc
+    - share
+    - eg
+    - examples
+    - author
+    - builder
+provides:
+  XML::RSS::LibXML:
+    file: lib/XML/RSS/LibXML.pm
+    version: 0.3103
+  XML::RSS::LibXML::ImplBase:
+    file: lib/XML/RSS/LibXML/ImplBase.pm
+  XML::RSS::LibXML::MagicElement:
+    file: lib/XML/RSS/LibXML/MagicElement.pm
+    version: 0.3103
+  XML::RSS::LibXML::Namespaces:
+    file: lib/XML/RSS/LibXML/Namespaces.pm
+  XML::RSS::LibXML::Null:
+    file: lib/XML/RSS/LibXML/Null.pm
+  XML::RSS::LibXML::V0_9:
+    file: lib/XML/RSS/LibXML/V0_9.pm
+  XML::RSS::LibXML::V0_91:
+    file: lib/XML/RSS/LibXML/V0_91.pm
+  XML::RSS::LibXML::V0_92:
+    file: lib/XML/RSS/LibXML/V0_92.pm
+  XML::RSS::LibXML::V1_0:
+    file: lib/XML/RSS/LibXML/V1_0.pm
+  XML::RSS::LibXML::V2_0:
+    file: lib/XML/RSS/LibXML/V2_0.pm
 requires:
   Class::Accessor::Fast: 0
   DateTime::Format::Mail: 0
@@ -27,6 +57,13 @@ requires:
   XML::LibXML: 1.66
   XML::LibXML::XPathContext: 0
 resources:
-  license: http://dev.perl.org/licenses/
+  bugtracker: https://github.com/lestrrat/XML-RSS-LibXML/issues
+  homepage: https://github.com/lestrrat/XML-RSS-LibXML
   repository: git://github.com/lestrrat/XML-RSS-LibXML.git
-version: 0.3102
+version: 0.3103
+x_contributors:
+  - 'Miyagawa Tatsuhiko <miyagawa@bulknews.net>'
+  - 'David E. Wheeler <david@justatheory.com>'
+  - 'Aaron Crane <arc@cpan.org>'
+  - 'Syohei YOSHIDA <syohex@gmail.com>'
+  - 'Daisuke Maki <lestrrat+github@gmail.com>'

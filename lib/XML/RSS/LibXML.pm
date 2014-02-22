@@ -8,7 +8,7 @@ use XML::LibXML;
 use XML::LibXML::XPathContext;
 use XML::RSS::LibXML::Namespaces qw(NS_RSS10);
 
-our $VERSION = '0.3102';
+our $VERSION = '0.3103';
 
 __PACKAGE__->mk_accessors($_) for qw(impl encoding strict namespaces modules output stylesheets _internal num_items);
 
@@ -200,7 +200,8 @@ sub create_xpath_context
     my $self = shift;
     my $namespaces = shift || {};
     my $xc = XML::LibXML::XPathContext->new;
-    while ( my ($prefix, $namespace) = each %{ $namespaces } ) {
+    foreach my $prefix (keys %$namespaces) {
+        my $namespace = $namespaces->{$prefix};
         $xc->registerNs($prefix, $namespace);
     }
     return $xc;
@@ -226,6 +227,8 @@ sub guess_version_from_dom
         $namespaces->{$rss10_prefix} = NS_RSS10;
         $root->setNamespace(NS_RSS10, $rss10_prefix, 0);
     }
+
+    keys %{$namespaces}; # reset iterator
 
     my $xc  = $self->create_xpath_context(
         # use the minimum required to guess
@@ -330,7 +333,7 @@ such that it adheres to the XML::RSS interface.
 Use this module when you have severe performance requirements working with
 RSS files.
 
-=head1 VERSION 0.30
+=head1 VERSION 0.3103
 
 The original XML::RSS has been evolving in fairly rapid manner lately,
 and that meant that there were a lot of features to keep up with.
