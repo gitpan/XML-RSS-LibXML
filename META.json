@@ -4,7 +4,7 @@
       "-2007 Daisuke Maki <dmaki@cpan.org>, Tatsuhiko Miyagawa <miyagawa@bulknews.net>. All rights reserved."
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.11.0",
+   "generated_by" : "Minilla/v0.11.1",
    "license" : [
       "perl_5"
    ],
@@ -61,14 +61,14 @@
    "provides" : {
       "XML::RSS::LibXML" : {
          "file" : "lib/XML/RSS/LibXML.pm",
-         "version" : "0.3103"
+         "version" : "0.3104"
       },
       "XML::RSS::LibXML::ImplBase" : {
          "file" : "lib/XML/RSS/LibXML/ImplBase.pm"
       },
       "XML::RSS::LibXML::MagicElement" : {
          "file" : "lib/XML/RSS/LibXML/MagicElement.pm",
-         "version" : "0.3103"
+         "version" : "0.3104"
       },
       "XML::RSS::LibXML::Namespaces" : {
          "file" : "lib/XML/RSS/LibXML/Namespaces.pm"
@@ -103,7 +103,7 @@
          "web" : "https://github.com/lestrrat/XML-RSS-LibXML"
       }
    },
-   "version" : "0.3103",
+   "version" : "0.3104",
    "x_contributors" : [
       "Miyagawa Tatsuhiko <miyagawa@bulknews.net>",
       "David E. Wheeler <david@justatheory.com>",

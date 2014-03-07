@@ -2,7 +2,6 @@ Build.PL
 Changes
 LICENSE
 META.json
-Makefile
 README.md
 cpanfile
 lib/XML/RSS/LibXML.pm
